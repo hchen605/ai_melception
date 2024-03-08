@@ -3,6 +3,10 @@
 This repo is for the Melception project on GenAI Music Services.
 
 ## Usage
+
+### Setup
+Install `arrange` and `re-inst` independently with `requirements_$.txt`
+
 ### Download pre-trained weights:   
 Please download from
 [Google Drive](https://drive.google.com/file/d/10E6F8RbRuSSg9wmYiPv6jyDsaFSSuyte/view?usp=drive_link)    

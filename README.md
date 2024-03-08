@@ -4,13 +4,20 @@ This repo is for the Melception project on GenAI Music Services.
 
 ## Usage
 ### Download pre-trained weights:   
-TBA
+Please download from
+[Google Drive](https://drive.google.com/file/d/10E6F8RbRuSSg9wmYiPv6jyDsaFSSuyte/view?usp=drive_link)    
+Put the folder at `./arrange`
+### Download data (for training):
+```
+wget http://hog.ee.columbia.edu/craffel/lmd/lmd_full.tar.gz
+tar -xzf lmd_full.tar.gz
+```
 
 ### Gen control description:   
 `CUDA_VISIBLE_DEVICES=$ FILE=arrange/data/Honestly_Piano_12.midi MODEL=figaro-expert CHECKPOINT=arrange/checkpoints/figaro-expert.ckpt python arrange/src/sample_desc.py`   
 Find output at `desc` folder
    
-### Gen sample based on user control:   
+### Gen sample based on user control description:   
 `CUDA_VISIBLE_DEVICES=$ CONTROL=arrange/desc/description_honest.txt MODEL=figaro-expert CHECKPOINT=arrange/checkpoints/figaro-expert.ckpt python arrange/src/gen_sample.py`    
 Find output at `sample` folder
     

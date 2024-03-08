@@ -16,16 +16,24 @@ Put the folder at `./arrange`
 wget http://hog.ee.columbia.edu/craffel/lmd/lmd_full.tar.gz
 tar -xzf lmd_full.tar.gz
 ```
+### 0. Gen init output after upload:   
+TBA
 
-### Gen control description:   
-`CUDA_VISIBLE_DEVICES=$ FILE=arrange/data/Honestly_Piano_12.midi MODEL=figaro-expert CHECKPOINT=arrange/checkpoints/figaro-expert.ckpt python arrange/src/sample_desc.py`   
-Find output at `desc` folder
+### 1. Gen control description:   
+```
+CUDA_VISIBLE_DEVICES=$ FILE=arrange/data/Honestly_Piano_12.midi MODEL=figaro-expert CHECKPOINT=arrange/checkpoints/figaro-expert.ckpt python arrange/src/sample_desc.py
+```   
+$Output.txt will be generated in `arrange/desc` folder. User can edit the description text for fine-grained control over music generation.
    
-### Gen sample based on user control description:   
-`CUDA_VISIBLE_DEVICES=$ CONTROL=arrange/desc/description_honest.txt MODEL=figaro-expert CHECKPOINT=arrange/checkpoints/figaro-expert.ckpt python arrange/src/gen_sample.py`    
-Find output at `sample` folder
+### 2. Gen sample based on user control description:   
+```
+CUDA_VISIBLE_DEVICES=$ CONTROL=arrange/desc/description_honest.txt MODEL=figaro-expert CHECKPOINT=arrange/checkpoints/figaro-expert.ckpt python arrange/src/gen_sample.py
+```    
+Find $output.mid at `arrange/sample` folder. Usually it would take a few minutes to run based on input length.
     
-### Gen re-instrument sample:  
+### 3. Gen re-instrument sample:  
 `cd re-inst`    
-`CUDA_VISIBLE_DEVICES=$ python re-inst/gen_reinstrumentation_sample.py`
-Find output at `demo/test` folder
+```
+CUDA_VISIBLE_DEVICES=$ python re-inst/gen_reinstrumentation_sample.py
+```
+Find $output.mid at `demo/test` folder

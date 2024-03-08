@@ -7,6 +7,7 @@ import math
 from datasets import MidiDataModule
 from vocab import RemiVocab, DescriptionVocab
 from constants import PAD_TOKEN, EOS_TOKEN, BAR_KEY, POSITION_KEY
+from tqdm import tqdm
 
 
 import transformers
@@ -344,7 +345,7 @@ class Seq2SeqModule(pl.LightningModule):
 
     curr_bars = torch.zeros(batch_size).fill_(-1)
     # Sample using decoder until max_length is reached or all sequences are done
-    for i in range(curr_len - 1, max_length):
+    for i in tqdm(range(curr_len - 1, max_length)):
       # print(f"\r{i+1}/{max_length}", end='')
       x_ = x[:, -self.context_size:].to(self.device)
       bar_ids_ = bar_ids[:, -self.context_size:].to(self.device)

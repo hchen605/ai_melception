@@ -14,7 +14,7 @@ from constants import (
   NOTE_DENSITY_KEY, MEAN_PITCH_KEY, MEAN_VELOCITY_KEY, MEAN_DURATION_KEY
 )
 
-
+CONTROL= os.getenv('CONTROL','./arrange/desc/description_honest.txt')
 CACHE_PATH = os.getenv('CACHE_PATH', os.getenv('SCRATCH', os.getenv('TMPDIR', './temp')))
 LATENT_CACHE_PATH = os.getenv('LATENT_CACHE_PATH', os.path.join(os.getenv('SCRATCH', os.getenv('TMPDIR', './temp')), 'latent'))
 
@@ -796,9 +796,10 @@ class MidiDataset_Desc(IterableDataset):
     events = rep.get_remi_events()
     description = rep.get_description()
      
-    print('------ gen test 3 --------\n')
+    #print('------ gen test 3 --------\n')
     #print(events)
-    file_path = 'arrange/desc/description_honest.txt'
+    #file_path = 'arrange/desc/description_honest.txt'
+    file_path = CONTROL
     description = []
     with open(file_path, 'r') as file:
       # Read the content of the file
@@ -816,7 +817,7 @@ class MidiDataset_Desc(IterableDataset):
 
       # Add the last item in the content to the loaded list
       description.append(content[-1])
-      print('------ gen test 4 --------\n')
+      print('------ Loading Description --------')
       #print(description)
 
       sample = {

@@ -16,7 +16,9 @@ MODEL = os.getenv('MODEL', '')
 
 #ROOT_DIR = os.getenv('ROOT_DIR', './lmd_full')
 ROOT_DIR = os.getenv('ROOT_DIR', './arrange/data')
-OUTPUT_DIR = os.getenv('OUTPUT_DIR', './samples_hh')
+OUTPUT_DIR = os.getenv('OUTPUT_DIR', './arrange/samples')
+DESC_DIR = os.getenv('DESC_DIR', './arrange/desc')
+FILE = os.getenv('FILE','./arrange/data/input.mid')
 MAX_N_FILES = int(float(os.getenv('MAX_N_FILES', -1)))
 MAX_ITER = int(os.getenv('MAX_ITER', 16_000))
 MAX_BARS = int(os.getenv('MAX_BARS', 32))
@@ -46,10 +48,14 @@ def reconstruct_sample(model, batch,
   if model.description_flavor in ['latent', 'both']:
     batch_['latents'] = batch['latents']
 
-  print('------ Input description --------')
+  print('------ Input description generating ... --------')
   #print(batch['desc_events'])
   
-  file_path = 'arrange/desc/description_honest.txt'
+  #file_path = 'arrange/desc/description.txt'
+  if DESC_DIR:
+    os.makedirs(DESC_DIR, exist_ok=True)
+  file_path = DESC_DIR + '/description.txt'
+  
   prefix_condition = 'Bar_'
   with open(file_path, 'w') as file:
     # Write each string from the list to the file
@@ -60,6 +66,7 @@ def reconstruct_sample(model, batch,
       else:
           file.write("%s," % item)
     file.write("%s" % batch['desc_events'][0][-1])
+  print('------ Finished --------')
   #return events
 
 
@@ -97,8 +104,9 @@ def main():
   print('------ Load MIDI --------')
 
   #midi_files = glob.glob(os.path.join(ROOT_DIR, '**/*.mid'), recursive=True)
-  midi_files = glob.glob(ROOT_DIR + '/*.mid', recursive=True)
-  midi_files = [ROOT_DIR + '/Honestly_Piano_12.midi']
+  #midi_files = glob.glob(ROOT_DIR + '/*.mid', recursive=True)
+  #midi_files = [ROOT_DIR + '/Honestly_Piano_12.midi']
+  midi_files = [FILE]
   #print(midi_files)
 
   if MAX_N_FILES > 0:

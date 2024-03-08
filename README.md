@@ -7,11 +7,11 @@ This repo is for the Melception project on GenAI Music Services.
 TBA
 
 ### Gen control description:   
-`CUDA_VISIBLE_DEVICES=$ MODEL=figaro-expert CHECKPOINT=arrange/checkpoints/figaro-expert.ckpt python arrange/src/sample_desc.py`   
+`CUDA_VISIBLE_DEVICES=$ FILE=arrange/data/Honestly_Piano_12.midi MODEL=figaro-expert CHECKPOINT=arrange/checkpoints/figaro-expert.ckpt python arrange/src/sample_desc.py`   
 Find output at `desc` folder
    
 ### Gen sample based on user control:   
-`CUDA_VISIBLE_DEVICES=$ MODEL=figaro-expert CHECKPOINT=arrange/checkpoints/figaro-expert.ckpt python arrange/src/gen_sample.py`    
+`CUDA_VISIBLE_DEVICES=$ CONTROL=arrange/desc/description_honest.txt MODEL=figaro-expert CHECKPOINT=arrange/checkpoints/figaro-expert.ckpt python arrange/src/gen_sample.py`    
 Find output at `sample` folder
     
 ### Gen re-instrument sample:  

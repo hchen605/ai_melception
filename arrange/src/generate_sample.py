@@ -16,7 +16,9 @@ MODEL = os.getenv('MODEL', '')
 
 #ROOT_DIR = os.getenv('ROOT_DIR', './lmd_full')
 ROOT_DIR = os.getenv('ROOT_DIR', './arrange/data')
-OUTPUT_DIR = os.getenv('OUTPUT_DIR', './samples_hh')
+OUTPUT_DIR = os.getenv('OUTPUT_DIR', './arrange/samples')
+FILE = os.getenv('FILE','./arrange/data/Honestly_Piano_12.midi')
+#CONTROL= os.getenv('CONTROL','./arrange/desc/description_honest.txt')
 MAX_N_FILES = int(float(os.getenv('MAX_N_FILES', -1)))
 MAX_ITER = int(os.getenv('MAX_ITER', 16_000))
 MAX_BARS = int(os.getenv('MAX_BARS', 32))
@@ -28,7 +30,7 @@ N_MEDLEY_BARS = int(os.getenv('N_MEDLEY_BARS', 16))
 CHECKPOINT = os.getenv('CHECKPOINT', None)
 VAE_CHECKPOINT = os.getenv('VAE_CHECKPOINT', None)
 BATCH_SIZE = int(os.getenv('BATCH_SIZE', 1))
-VERBOSE = int(os.getenv('VERBOSE', 2))
+VERBOSE = int(os.getenv('VERBOSE', 0))
 
 def reconstruct_sample(model, batch, 
   initial_context=1, 
@@ -47,7 +49,7 @@ def reconstruct_sample(model, batch,
     batch_['latents'] = batch['latents']
 
   #print(batch['desc_events'])
-  print('------ gen test 2 --------')
+  print('------ Generating ... --------')
 
   max_len = seq_len + 1024
   if max_iter > 0:
@@ -77,11 +79,11 @@ def reconstruct_sample(model, batch,
       n_fatal += 1
 
   if output_dir:
-    os.makedirs(os.path.join(output_dir, 'gt'), exist_ok=True)
+    os.makedirs(output_dir, exist_ok=True)
     for pm, pm_hat, file in zip(pms, pms_hat, batch['files']):
       if verbose:
         print(f"Saving to {output_dir}/{file}")
-      pm.write(os.path.join(output_dir, 'gt', file))
+      #pm.write(os.path.join(output_dir, 'gt', file))
       pm_hat.write(os.path.join(output_dir, file))
 
   return events
@@ -118,11 +120,12 @@ def main():
   model.freeze()
   model.eval()
 
-  print('------ gen test 0 --------')
+  print('------ Model loaded --------')
 
   #midi_files = glob.glob(os.path.join(ROOT_DIR, '**/*.mid'), recursive=True)
   #midi_files = glob.glob(ROOT_DIR + '/*.mid', recursive=True)
-  midi_files = [ROOT_DIR + '/tested/Honestly_Piano_12.midi']
+  #midi_files = [ROOT_DIR + '/tested/Honestly_Piano_12.midi']
+  midi_files = [FILE]
   #print(midi_files)
   
   # dm = model.get_datamodule(midi_files, vae_module=vae_module)
@@ -147,7 +150,7 @@ def main():
     vae_module=vae_module
   )
 
-  print('------ gen test 1 --------')
+  #print('------ gen test 1 --------')
 
   start_time = time.time()
   coll = SeqCollator(context_size=-1)

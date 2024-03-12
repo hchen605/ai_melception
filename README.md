@@ -25,9 +25,9 @@ CUDA_VISIBLE_DEVICES=$ FILE=arrange/data/Honestly_Piano_12.midi MODEL=figaro-exp
 ```   
 $Output.txt will be generated in `arrange/desc` folder. User can edit the description text for fine-grained control over music generation.
    
-### Gen sample based on user control description:   
+### 2. Gen sample based on user control description:   
 ```
-CUDA_VISIBLE_DEVICES=$ CONTROL=arrange/desc/description_honest.txt MODEL=figaro-expert CHECKPOINT=arrange/checkpoints/figaro-expert.ckpt python arrange/src/gen_sample.py
+CUDA_VISIBLE_DEVICES=$ CONTROL=arrange/desc/description_honest.txt MODEL=figaro-expert CHECKPOINT=arrange/checkpoints/figaro-expert.ckpt python arrange/src/generate_sample.py
 ```    
 Find output at `sample` folder
     

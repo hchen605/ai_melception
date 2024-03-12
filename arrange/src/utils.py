@@ -1,5 +1,6 @@
 import torch
 from torch.nn.utils.rnn import pad_sequence
+import pretty_midi
 
 def combine_batches(batches, bars_per_sequence=8, description_flavor='none', device=None):
   if device is None:
@@ -112,3 +113,48 @@ def medley_iterator(dl, n_pieces=2, n_bars=8, description_flavor='none'):
       yield batch
   except StopIteration:
     return
+
+def merge_midi_files(midi_file1_path, midi_file2_path, output_file_path):
+    # Load MIDI files
+    midi_data1 = pretty_midi.PrettyMIDI(midi_file1_path)
+    midi_data2 = pretty_midi.PrettyMIDI(midi_file2_path)
+    
+    # Create a new PrettyMIDI object
+    merged_midi = pretty_midi.PrettyMIDI()
+
+    # Merge instrument tracks
+    for instrument1 in midi_data1.instruments:
+        # Create a new instrument in the merged MIDI object
+        merged_instrument = pretty_midi.Instrument(program=instrument1.program, is_drum=instrument1.is_drum)
+        
+        # Add notes from the first MIDI file
+        for note in instrument1.notes:
+            merged_instrument.notes.append(note)
+        
+        # Add the merged instrument to the merged MIDI object
+        merged_midi.instruments.append(merged_instrument)
+
+    for instrument2 in midi_data2.instruments:
+        # Create a new instrument in the merged MIDI object
+        merged_instrument = pretty_midi.Instrument(program=instrument2.program, is_drum=instrument2.is_drum)
+        
+        # Add notes from the second MIDI file
+        for note in instrument2.notes:
+            merged_instrument.notes.append(note)
+        
+        # Add the merged instrument to the merged MIDI object
+        merged_midi.instruments.append(merged_instrument)
+
+    # Save the merged MIDI file
+    merged_midi.write(output_file_path)
+
+## test
+# Paths to your MIDI files
+#midi_file2_path = "/home/hsinhung/ai_melception/arrange/samples/figaro-expert/max_iter=16000,max_bars=32/Honestly_Piano_12.midi"
+#midi_file1_path = "/home/hsinhung/AccoMontage-3/demo/Honestly/arrangement_band.mid"
+#output_file_path = "/home/hsinhung/ai_melception/arrange/samples/merged_midi_test.mid"
+
+# Call the function to merge MIDI files
+#merge_midi_files(midi_file1_path, midi_file2_path, output_file_path)
+
+

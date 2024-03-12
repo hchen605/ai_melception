@@ -547,9 +547,11 @@ def remi2midi(events, bpm=120, time_signature=(4, 4), polyphony_limit=16):
   # time_sigs = [event.split('_')[-1].split('/') for event in events if f"{TIME_SIGNATURE_KEY}_" in event]
   # time_sigs = [(int(num), int(denom)) for num, denom in time_sigs]
 
-  tempo_changes = [event for event in events if f"{TEMPO_KEY}_" in event]
-  if len(tempo_changes) > 0:
-    bpm = DEFAULT_TEMPO_BINS[int(tempo_changes[0].split('_')[-1])]
+  #tempo_changes = [event for event in events if f"{TEMPO_KEY}_" in event]
+  #print(tempo_changes)
+  #if len(tempo_changes) > 0:
+  #  bpm = DEFAULT_TEMPO_BINS[int(tempo_changes[0].split('_')[-1])]
+    #print('bpm: ', bpm)
 
   pm = pretty_midi.PrettyMIDI(initial_tempo=bpm)
   num, denom = time_signature

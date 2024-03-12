@@ -22,7 +22,7 @@ tar -xzf lmd_full.tar.gz
 Find output at `desc` folder
    
 ### Gen sample based on user control description:   
-`CUDA_VISIBLE_DEVICES=$ CONTROL=arrange/desc/description_honest.txt MODEL=figaro-expert CHECKPOINT=arrange/checkpoints/figaro-expert.ckpt python arrange/src/gen_sample.py`    
+`CUDA_VISIBLE_DEVICES=$ CONTROL=arrange/desc/description_honest.txt MODEL=figaro-expert CHECKPOINT=arrange/checkpoints/figaro-expert.ckpt python arrange/src/generate_sample.py`    
 Find output at `sample` folder
     
 ### Gen re-instrument sample:  

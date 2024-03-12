@@ -11,6 +11,7 @@ from models.seq2seq import Seq2SeqModule
 from datasets import MidiDataset, SeqCollator, MidiDataset_Desc
 from utils import medley_iterator
 from input_representation import remi2midi
+from constants import DEFAULT_TEMPO_BINS, TEMPO_KEY
 
 MODEL = os.getenv('MODEL', '')
 
@@ -62,17 +63,21 @@ def reconstruct_sample(model, batch,
   xs_hat = sample['sequences'].detach().cpu()
   events = [model.vocab.decode(x) for x in xs]
   events_hat = [model.vocab.decode(x) for x in xs_hat]
+  tempo_changes = [event for event in events[0] if f"{TEMPO_KEY}_" in event]
+  #print(tempo_changes)
+  if len(tempo_changes) > 0:
+    bpm = DEFAULT_TEMPO_BINS[int(tempo_changes[0].split('_')[-1])]
 
   pms, pms_hat = [], []
   n_fatal = 0
   for rec, rec_hat in zip(events, events_hat):
     try:
-      pm = remi2midi(rec)
+      pm = remi2midi(rec, bpm=bpm)
       pms.append(pm)
     except Exception as err:
       print("ERROR: Could not convert events to midi:", err)
     try:
-      pm_hat = remi2midi(rec_hat)
+      pm_hat = remi2midi(rec_hat, bpm=bpm)
       pms_hat.append(pm_hat)
     except Exception as err:
       print("ERROR: Could not convert events to midi:", err)

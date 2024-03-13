@@ -122,6 +122,8 @@ def main():
     vae_module = None
 
   model = Seq2SeqModule.load_from_checkpoint(CHECKPOINT)
+  #device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+  #model.to(device)
   model.freeze()
   model.eval()
 

@@ -343,7 +343,7 @@ class Seq2SeqModule(pl.LightningModule):
     else:
       encoder_hidden_states = None
 
-    curr_bars = torch.zeros(batch_size).fill_(-1)
+    curr_bars = torch.zeros(batch_size).fill_(-1)#.to(self.device)
     # Sample using decoder until max_length is reached or all sequences are done
     for i in tqdm(range(curr_len - 1, max_length)):
       # print(f"\r{i+1}/{max_length}", end='')
@@ -364,11 +364,11 @@ class Seq2SeqModule(pl.LightningModule):
 
         if bars_changed:
           z_ = torch.zeros(batch_size, self.context_size, dtype=torch.int)
-          desc_bar_ids_ = torch.zeros(batch_size, self.context_size, dtype=torch.int)
+          desc_bar_ids_ = torch.zeros(batch_size, self.context_size, dtype=torch.int)#.to(self.device)
 
           for j in range(batch_size):
             curr_bar = bar_ids_[j, 0]
-            indices = torch.nonzero(desc_bar_ids[j] == curr_bar)
+            indices = torch.nonzero(desc_bar_ids[j] == curr_bar)#indices = torch.nonzero(desc_bar_ids[j].to(self.device) == curr_bar)
             if indices.size(0) > 0:
               idx = indices[0, 0]
             else:

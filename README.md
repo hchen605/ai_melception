@@ -21,8 +21,10 @@ wget http://hog.ee.columbia.edu/craffel/lmd/lmd_full.tar.gz
 tar -xzf lmd_full.tar.gz
 ```
 ### 0. Gen init output after upload:   
-`cd init`    
-`CUDA_VISIBLE_DEVICES=$ python gen_sample_preload.py`
+```
+cd init   
+CUDA_VISIBLE_DEVICES=$ python gen_sample_preload.py
+```
 
 ### 1. Gen control description:   
 ```

@@ -1,19 +1,23 @@
 # ai_melception
 
-This repo is for the Melception project on GenAI Music Services. 
+This repo is for the Melception project on GenAI Music Services. The target is controllable user-conditioned music accompaniment generation.     
+
+Some demos may be seen at https://www.melception.com/ 
 
 ## Usage
 
 ### Setup
-Install `arrange` and `re-inst` independently with `requirements_$.txt`
+Install `arrange` and `re-inst` independently with `requirements_$.txt`    
+`init` share the same env with `arrange`    
+TBA: merge to single env.    
 
 ### Download pre-trained weights:   
 Please download from
-[Google Drive]
-Init: (https://drive.google.com/drive/folders/17yB-Oae_4eGKJmqRS-LB8PwE2rqwZrUu?usp=sharing)    
-put the folder at `./init`    
-Arragement: (https://drive.google.com/file/d/10E6F8RbRuSSg9wmYiPv6jyDsaFSSuyte/view?usp=drive_link)   
-Put the folder at `./arrange`     
+[Google Drive]     
+-- Init: (https://drive.google.com/drive/folders/17yB-Oae_4eGKJmqRS-LB8PwE2rqwZrUu?usp=sharing)    
+put the downloaded folder at `./init`    
+-- Arragement: (https://drive.google.com/file/d/10E6F8RbRuSSg9wmYiPv6jyDsaFSSuyte/view?usp=drive_link)   
+Put the downloaded folder at `./arrange`     
 The weights for re-instrumentation are included in the repo.   
 ### Download data (for training):
 ```
@@ -30,13 +34,15 @@ CUDA_VISIBLE_DEVICES=$ python gen_sample_preload.py
 ```
 CUDA_VISIBLE_DEVICES=$ FILE=arrange/data/Honestly_Piano_12.midi MODEL=figaro-expert CHECKPOINT=arrange/checkpoints/figaro-expert.ckpt python arrange/src/sample_desc.py
 ```   
-$Output.txt will be generated in `arrange/desc` folder. User can edit the description text for fine-grained control over music generation.
+Input midi can be set by `FILE`. Description text file $Output.txt will be generated in `arrange/desc` folder.    
+User can edit the description text for fine-grained control over music generation.
    
 ### 2. Gen sample based on user control description:   
 ```
 CUDA_VISIBLE_DEVICES=$ CONTROL=arrange/desc/description_honest.txt MODEL=figaro-expert CHECKPOINT=arrange/checkpoints/figaro-expert.ckpt python arrange/src/generate_sample.py
 ```    
-Find output at `sample` folder
+`CONTROL` is the user attribute description text file.    
+Find midi output at `sample` folder
     
 ### 3. Gen re-instrument sample:  
 

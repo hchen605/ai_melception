@@ -7,18 +7,17 @@ Some demos may be seen at https://www.melception.com/
 ## Usage
 
 ### Setup
-Install `arrange` and `re-inst` independently with `requirements_$.txt`    
-`init` share the same env with `arrange`    
-TBA: merge to single env.    
+* Install `arrange` and `re-inst` independently with `requirements_$.txt`    
+  - `init` share the same env with `arrange`    
+  - TBA: merge to single env.    
 
-### Download pre-trained weights:   
-Please download from
-[Google Drive]     
--- Init: (https://drive.google.com/drive/folders/17yB-Oae_4eGKJmqRS-LB8PwE2rqwZrUu?usp=sharing)    
-put the downloaded folder at `./init`    
--- Arragement: (https://drive.google.com/file/d/10E6F8RbRuSSg9wmYiPv6jyDsaFSSuyte/view?usp=drive_link)   
-Put the downloaded folder at `./arrange`     
+* Run the following to download training data and pre-trained weights:
+  - pre-trained weight for `init` and `arrange` will be saved in the corresponding folders
+```
+python ./utils/prep.py --data_path=<dir_to_save_training_data>
+```     
 The weights for re-instrumentation are included in the repo.   
+
 ### Download data (for training):
 ```
 wget http://hog.ee.columbia.edu/craffel/lmd/lmd_full.tar.gz

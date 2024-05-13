@@ -1,10 +1,9 @@
 import os
-import pretty_midi as pyd 
 import numpy as np 
 import torch
 from torch.utils.data import DataLoader
-from scipy.interpolate import interp1d
 from tqdm import tqdm
+import pickle
 
 from piano_arranger.acc_utils import split_phrases
 import piano_arranger.format_converter as cvt
@@ -14,10 +13,7 @@ from piano_arranger.AccoMontage import find_by_length, dp_search, re_harmonizati
 from orchestrator import Slakh2100_Pop909_Dataset, collate_fn, compute_pr_feat, EMBED_PROGRAM_MAPPING, Prior
 from orchestrator.QA_dataset import SLAKH_CLASS_PROGRAMS
 from orchestrator.utils import grid2pr, pr2grid, matrix2midi, midi2matrix
-
 from orchestrator.prior_dataset import TOTAL_LEN_BIN, ABS_POS_BIN, REL_POS_BIN
-import json
-import pickle
 
 SLAKH_CLASS_MAPPING = {v: k for k, v in EMBED_PROGRAM_MAPPING.items()}
 
@@ -31,6 +27,7 @@ def load_premise(DATA_FILE_ROOT, DEVICE):
     chord = data['chord']
     vel = data['velocity']
     cc = data['cc']
+
     acc_pool = {}
     for LEN in tqdm(range(2, 13)):
         (mel, acc_, chord_, vel_, cc_, song_reference) = find_by_length(melody, acc, chord, vel, cc, LEN)
@@ -68,6 +65,7 @@ def load_premise(DATA_FILE_ROOT, DEVICE):
     print('Finished.')
     return piano_arranger, orchestrator, (acc_pool, edge_weights, texture_filter), (REF, REF_PROG, REF_MIX)
 
+
 def load_premise_preload(DATA_FILE_ROOT, DEVICE):
     """Load AccoMontage Search Space"""
     print('Loading AccoMontage piano texture search space. This may take 1 or 2 minutes ...')
@@ -78,50 +76,27 @@ def load_premise_preload(DATA_FILE_ROOT, DEVICE):
     vel = data['velocity']
     cc = data['cc']
     acc_pool = {}
+
     for LEN in tqdm(range(2, 13)):
         (mel, acc_, chord_, vel_, cc_, song_reference) = find_by_length(melody, acc, chord, vel, cc, LEN)
         acc_pool[LEN] = (mel, acc_, chord_, vel_, cc_, song_reference)
     texture_filter = get_texture_filter(acc_pool)
     edge_weights=np.load(os.path.join(DATA_FILE_ROOT, 'edge_weights.npz'), allow_pickle=True)
 
-    # Define the file path where you want to save the dictionary
-    #file_path = 'acc_pool.json'
-    # Save the dictionary to a JSON file
-    #with open(os.path.join(DATA_FILE_ROOT,file_path), 'w') as f:
-    #    json.dump(acc_pool, f)
-    #with open(file_path, 'r') as f:
-    #    acc_pool = json.load(f)
-
     """Load Q&A Prompt Search Space"""
     print('loading orchestration prompt search space ...')
     slakh_dir = os.path.join(DATA_FILE_ROOT, 'Slakh2100_inference_set')
-    #dataset = Slakh2100_Pop909_Dataset(slakh_dir=slakh_dir, pop909_dir=None, debug_mode=False, split='validation', mode='train')
 
-    #loader = DataLoader(dataset, batch_size=1, shuffle=True, collate_fn=lambda b:collate_fn(b, DEVICE))
-    # REF = []
-    # REF_PROG = []
-    # REF_MIX = []
     print('--- Creating REF ---') #can save and load to save time
-    # for (_, prog, function, _, _, _) in tqdm(loader):
-    #     prog = prog[0, :]
 
-    #     REF.extend([batch for batch in function])
-    #     REF_PROG.extend([prog for _ in range(len(function))])
-    #     REF_MIX.append(torch.sum(function, dim=1))
-    # REF_MIX = torch.cat(REF_MIX, dim=0)
-
-    # def save_lists(file_path, *lists):
-    #     with open(file_path, 'wb') as f:
-    #         pickle.dump(lists, f)
     def load_lists(file_path):
         with open(file_path, 'rb') as f:
             loaded_lists = pickle.load(f)
         return loaded_lists
 
-    #file_path = os.path.join(DATA_FILE_ROOT, 'REF.pkl')
     file_path = 'REF.pkl'
-    #save_lists(file_path, REF, REF_PROG, REF_MIX)
     REF, REF_PROG, REF_MIX = load_lists(file_path)
+
     """Initialize orchestration model (Prior + Q&A)"""
     print('Initialize model ...')
     prior_model_path = os.path.join(DATA_FILE_ROOT, 'params_prior.pt')
@@ -133,6 +108,7 @@ def load_premise_preload(DATA_FILE_ROOT, DEVICE):
     piano_arranger.load_state_dict(torch.load(os.path.join(DATA_FILE_ROOT, 'params_reharmonizer.pt')))
     print('Finished.')
     return piano_arranger, orchestrator, (acc_pool, edge_weights, texture_filter), (REF, REF_PROG, REF_MIX)
+
 
 def read_lead_sheet(DEMO_ROOT, SONG_NAME, SEGMENTATION, NOTE_SHIFT, MIDI_FILE, melody_track_ID=0):
     melody_roll, chord_roll = cvt.leadsheet2matrix(os.path.join(DEMO_ROOT, SONG_NAME, MIDI_FILE), melody_track_ID)
@@ -209,6 +185,7 @@ def prompt_sampling(acc_piano, REF, REF_PROG, REF_MIX, DEVICE='cuda:0'):
     program_name = [SLAKH_CLASS_PROGRAMS[item] for item in prog_class]
     print(f'Prior model initialized with {len(program_name)} tracks:\n\t{program_name}')
     return prog, function
+
 
 def orchestration(acc_piano, chord_track, prog, function, orchestrator, DEVICE='cuda:0', blur=.5, p=.1, t=4, tempo=100):
     print('Orchestration begins ...')

@@ -78,6 +78,7 @@ class Seq2SeqModule(pl.LightningModule):
       max_position_embeddings=1024,
       position_embedding_type='relative_key_query'
     )
+
     decoder_config = BertConfig(
       vocab_size=1,
       pad_token_id=0,
@@ -88,16 +89,16 @@ class Seq2SeqModule(pl.LightningModule):
       max_position_embeddings=1024,
       position_embedding_type='relative_key_query'
     )
+
     config = EncoderDecoderConfig.from_encoder_decoder_configs(encoder_config, decoder_config)
     self.transformer = EncoderDecoderModel(config)
     self.transformer.config.decoder.is_decoder = True
     self.transformer.config.decoder.add_cross_attention = True
 
-
     self.max_bars = self.context_size
     self.max_positions = 512
-    self.bar_embedding = nn.Embedding(self.max_bars + 1, self.d_model)
-    self.pos_embedding = nn.Embedding(self.max_positions + 1, self.d_model)
+    self.bar_embedding = nn.Embedding(self.max_bars+1, self.d_model)
+    self.pos_embedding = nn.Embedding(self.max_positions+1, self.d_model)
 
     if self.description_flavor in ['latent', 'both']:
       if use_pretrained_latent_embeddings:
@@ -236,7 +237,6 @@ class Seq2SeqModule(pl.LightningModule):
     else:
       z, desc_bar_ids = None, None
 
-    
     logits = self(x, z=z, labels=labels, bar_ids=bar_ids, position_ids=position_ids, description_bar_ids=desc_bar_ids)
     # Shape of logits: (batch_size, tgt_len, tuple_size, vocab_size)
     pred = logits.view(-1, logits.shape[-1])
@@ -310,14 +310,11 @@ class Seq2SeqModule(pl.LightningModule):
   ):
     
     # Setup and parsing arguments
-
     pad_token_id = self.vocab.to_i(pad_token)
     eos_token_id = self.vocab.to_i(eos_token)
-
     batch_size, curr_len = batch['input_ids'].shape
 
     i = curr_len - 1
-
     x = batch['input_ids']
     bar_ids = batch['bar_ids']
     position_ids = batch['position_ids']
@@ -419,7 +416,6 @@ class Seq2SeqModule(pl.LightningModule):
 
       if torch.all(is_done):
         break
-    # print()
 
     return {
       'sequences': x,

@@ -13,3 +13,5 @@ mir_eval==0.7
 pytorch-lightning==2.2.4
 torchtext==0.17.0
 transformers==4.10.2
+gdown==5.2.0
+wget==3.2

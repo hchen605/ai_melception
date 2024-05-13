@@ -1,20 +1,15 @@
-
 import os
-import glob
-import time
+#import time
 import torch
-import random
 from torch.utils.data import DataLoader
 
 from models.vae import VqVaeModule
 from models.seq2seq import Seq2SeqModule
 from datasets import MidiDataset, SeqCollator
 from utils import medley_iterator
-from input_representation import remi2midi
 
 MODEL = os.getenv('MODEL', '')
 
-#ROOT_DIR = os.getenv('ROOT_DIR', './lmd_full')
 ROOT_DIR = os.getenv('ROOT_DIR', './arrange/data')
 OUTPUT_DIR = os.getenv('OUTPUT_DIR', './arrange/samples')
 DESC_DIR = os.getenv('DESC_DIR', './arrange/desc')
@@ -32,16 +27,10 @@ VAE_CHECKPOINT = os.getenv('VAE_CHECKPOINT', None)
 BATCH_SIZE = int(os.getenv('BATCH_SIZE', 1))
 VERBOSE = int(os.getenv('VERBOSE', 2))
 
-def reconstruct_sample(model, batch, 
-  initial_context=1, 
-  output_dir=None, 
-  max_iter=-1, 
-  max_bars=-1,
-  verbose=0,
-):
-  batch_size, seq_len = batch['input_ids'].shape[:2]
+def reconstruct_sample(model, batch, initial_context=1, output_dir=None, max_iter=-1, max_bars=-1,verbose=0):
+  #batch_size, seq_len = batch['input_ids'].shape[:2]
 
-  batch_ = { key: batch[key][:, :initial_context] for key in ['input_ids', 'bar_ids', 'position_ids'] }
+  batch_ = {key: batch[key][:, :initial_context] for key in ['input_ids', 'bar_ids', 'position_ids'] }
   if model.description_flavor in ['description', 'both']:
     batch_['description'] = batch['description']
     batch_['desc_bar_ids'] = batch['desc_bar_ids']
@@ -49,9 +38,7 @@ def reconstruct_sample(model, batch,
     batch_['latents'] = batch['latents']
 
   print('------ Input description generating ... --------')
-  #print(batch['desc_events'])
   
-  #file_path = 'arrange/desc/description.txt'
   if DESC_DIR:
     os.makedirs(DESC_DIR, exist_ok=True)
   file_path = DESC_DIR + '/description.txt'
@@ -103,11 +90,7 @@ def main():
 
   print('------ Load MIDI --------')
 
-  #midi_files = glob.glob(os.path.join(ROOT_DIR, '**/*.mid'), recursive=True)
-  #midi_files = glob.glob(ROOT_DIR + '/*.mid', recursive=True)
-  #midi_files = [ROOT_DIR + '/Honestly_Piano_12.midi']
   midi_files = [FILE]
-  #print(midi_files)
 
   if MAX_N_FILES > 0:
     midi_files = midi_files[:MAX_N_FILES]
@@ -127,7 +110,7 @@ def main():
 
   print('------ Read event/description --------')
 
-  start_time = time.time()
+  #start_time = time.time()
   coll = SeqCollator(context_size=-1)
   dl = DataLoader(dataset, batch_size=BATCH_SIZE, collate_fn=coll)
 

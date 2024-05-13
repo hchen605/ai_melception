@@ -114,6 +114,7 @@ def medley_iterator(dl, n_pieces=2, n_bars=8, description_flavor='none'):
   except StopIteration:
     return
 
+
 def merge_midi_files(midi_file1_path, midi_file2_path, output_file_path):
     # Load MIDI files
     midi_data1 = pretty_midi.PrettyMIDI(midi_file1_path)
@@ -147,14 +148,5 @@ def merge_midi_files(midi_file1_path, midi_file2_path, output_file_path):
 
     # Save the merged MIDI file
     merged_midi.write(output_file_path)
-
-## test
-# Paths to your MIDI files
-#midi_file2_path = "/home/hsinhung/ai_melception/arrange/samples/figaro-expert/max_iter=16000,max_bars=32/Honestly_Piano_12.midi"
-#midi_file1_path = "/home/hsinhung/AccoMontage-3/demo/Honestly/arrangement_band.mid"
-#output_file_path = "/home/hsinhung/ai_melception/arrange/samples/merged_midi_test.mid"
-
-# Call the function to merge MIDI files
-#merge_midi_files(midi_file1_path, midi_file2_path, output_file_path)
 
 

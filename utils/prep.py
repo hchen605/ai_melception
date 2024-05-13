@@ -1,5 +1,4 @@
 import os
-import requests
 import gdown, wget
 import zipfile, tarfile
 import argparse
@@ -41,7 +40,7 @@ def main(args):
             if not os.path.exists(os.path.dirname(destination)):
                 os.mkdir(os.path.dirname(destination))
             print('Downloading...')
-            download_file(file, destination)
+            mode = download_file(file, destination)
             print('Unzipping...')
             unzip_file(destination, mode)
             print('Removing...')

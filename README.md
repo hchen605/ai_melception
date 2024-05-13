@@ -7,22 +7,17 @@ Some demos may be seen at https://www.melception.com/
 ## Usage
 
 ### Setup
-* Install `arrange` and `re-inst` independently with `requirements_$.txt`    
-  - `init` share the same env with `arrange`    
-  - TBA: merge to single env.    
+* This repo runs under `python=3.9`
+
+* Install required dependencies with `requirements_$.txt`    
 
 * Run the following to download training data and pre-trained weights:
   - pre-trained weight for `init` and `arrange` will be saved in the corresponding folders
-```
-python ./utils/prep.py --data_path=<dir_to_save_training_data>
-```     
-The weights for re-instrumentation are included in the repo.   
+  ```
+  python ./utils/prep.py --data_path=<dir_to_save_training_data>
+  ```     
+  The weights for re-instrumentation are included in the repo.   
 
-### Download data (for training):
-```
-wget http://hog.ee.columbia.edu/craffel/lmd/lmd_full.tar.gz
-tar -xzf lmd_full.tar.gz
-```
 ### 0. Gen init output after upload:   
 ```
 cd init   

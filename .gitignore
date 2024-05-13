@@ -168,6 +168,7 @@ metrics.csv
 .DS_Store
 lightning_logs
 tmp
+.vscode
 
 temp
 

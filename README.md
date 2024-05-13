@@ -8,7 +8,7 @@ Some demos may be seen at https://www.melception.com/
 
 ### Setup
 Install `arrange` and `re-inst` independently with `requirements_$.txt`    
-`init` share the same env with `arrange`    
+`init` share the same env with `re-inst`    
 TBA: merge to single env.    
 
 ### Download pre-trained weights:   

@@ -9,6 +9,7 @@ Some demos may be seen at https://www.melception.com/
 ### Setup
 Install `arrange` and `re-inst` independently with `requirements_$.txt`    
 `init` share the same env with `re-inst`    
+p.s. if you find issue training figaro model, you may try `requirements_arrange_train.txt`
 TBA: merge to single env.    
 
 ### Download pre-trained weights:   

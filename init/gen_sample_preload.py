@@ -32,12 +32,14 @@ PREFILTER = (RHTHM_DENSITY, VOICE_NUMBER)
 USE_PROMPT = True
 midi_path = 'Honestly_Piano_12.midi'
 lead_sheet = read_lead_sheet('./demo', SONG_NAME, SEGMENTATION, PICKUP_BEAT, midi_path)
+# lead_sheet == (LEADSHEET, CHORD_TABLE, melody_queries, query_phrases)
 
 #"""have a quick listen to the lead sheet"""
 print(' -- Load Piano lead sheet MIDI ready -- ')
+# piano_texture == (acc_pool, edge_weights, texture_filter)
 midi_piano, acc_piano = piano_arrangement(*lead_sheet, *piano_texture, piano_arranger, PREFILTER, TEMPO)
-arrg_piano = f'./demo/{SONG_NAME}/arrangement_piano.mid'
-midi_piano.write(arrg_piano)
+arrg_path = f'./demo/{SONG_NAME}/arrangement_piano.mid'
+midi_piano.write(arrg_path)
 
 func_prompt = prompt_sampling(acc_piano, *band_prompt, DEVICE)
 print(' -- func prompt ready -- ')
@@ -51,7 +53,7 @@ mel_track = pyd.Instrument(program=0, is_drum=False, name='melody')
 mel_track.notes = midi_piano.instruments[0].notes
 midi_band.instruments.append(mel_track)
 
-arrg_band = f'./demo/{SONG_NAME}/arrangement_band.mid'
-midi_band.write(arrg_band)
+arrg_band_path = f'./demo/{SONG_NAME}/arrangement_band.mid'
+midi_band.write(arrg_band_path)
 
 print(' -- Full band MIDI ready -- ')

@@ -38,6 +38,7 @@ def midi2matrix(track, quaver):
         pr_matrix[note_start, note.pitch] = note_end - note_start
     return pr_matrix
 
+
 def ec2vae_mel_format(pr_matrix):
     """
     convert (T, 128) melody format to (T, 130) format.

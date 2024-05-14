@@ -21,7 +21,7 @@ SAMPLE_BAR_LEN = 8
 
 MODEL_DIR = "./checkpoints/Q&A_epoch_029.pt"
 os.environ["CUDA_VISIBLE_DEVICES"] = "3"
-DEVICE = 'cuda:0'
+DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu") #'cuda:0'
 model = Query_and_reArrange(name='inference_model', device=DEVICE, trf_layers=2)
 model.load_state_dict(torch.load(MODEL_DIR, map_location='cpu'))
 model.to(DEVICE)

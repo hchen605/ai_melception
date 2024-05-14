@@ -5,11 +5,14 @@ from torch.utils.data import DataLoader
 from tqdm import tqdm
 import pickle
 
+# AccoMontage
 from piano_arranger.acc_utils import split_phrases
 import piano_arranger.format_converter as cvt
 from piano_arranger.models import DisentangleVAE
 from piano_arranger.AccoMontage import find_by_length, dp_search, re_harmonization, get_texture_filter, ref_spotlight
+import gc
 
+# QA
 from orchestrator import Slakh2100_Pop909_Dataset, collate_fn, compute_pr_feat, EMBED_PROGRAM_MAPPING, Prior
 from orchestrator.QA_dataset import SLAKH_CLASS_PROGRAMS
 from orchestrator.utils import grid2pr, pr2grid, matrix2midi, midi2matrix
@@ -17,58 +20,11 @@ from orchestrator.prior_dataset import TOTAL_LEN_BIN, ABS_POS_BIN, REL_POS_BIN
 
 SLAKH_CLASS_MAPPING = {v: k for k, v in EMBED_PROGRAM_MAPPING.items()}
 
-
-def load_premise(DATA_FILE_ROOT, DEVICE):
-    """Load AccoMontage Search Space"""
-    print('Loading AccoMontage piano texture search space. This may take 1 or 2 minutes ...')
-    data = np.load(os.path.join(DATA_FILE_ROOT, 'phrase_data.npz'), allow_pickle=True)
-    melody = data['melody']
-    acc = data['acc']
-    chord = data['chord']
-    vel = data['velocity']
-    cc = data['cc']
-
-    acc_pool = {}
-    for LEN in tqdm(range(2, 13)):
-        (mel, acc_, chord_, vel_, cc_, song_reference) = find_by_length(melody, acc, chord, vel, cc, LEN)
-        acc_pool[LEN] = (mel, acc_, chord_, vel_, cc_, song_reference)
-    texture_filter = get_texture_filter(acc_pool)
-    edge_weights=np.load(os.path.join(DATA_FILE_ROOT, 'edge_weights.npz'), allow_pickle=True)
-
-    """Load Q&A Prompt Search Space"""
-    print('loading orchestration prompt search space ...')
-    slakh_dir = os.path.join(DATA_FILE_ROOT, 'Slakh2100_inference_set')
-    dataset = Slakh2100_Pop909_Dataset(slakh_dir=slakh_dir, pop909_dir=None, debug_mode=False, split='validation', mode='train')
-
-    loader = DataLoader(dataset, batch_size=1, shuffle=True, collate_fn=lambda b:collate_fn(b, DEVICE))
-    REF = []
-    REF_PROG = []
-    REF_MIX = []
-    print('--- Creating REF ---') #can save and load to save time
-    for (_, prog, function, _, _, _) in tqdm(loader):
-        prog = prog[0, :]
-
-        REF.extend([batch for batch in function])
-        REF_PROG.extend([prog for _ in range(len(function))])
-        REF_MIX.append(torch.sum(function, dim=1))
-    REF_MIX = torch.cat(REF_MIX, dim=0)
-
-    """Initialize orchestration model (Prior + Q&A)"""
-    print('Initialize model ...')
-    prior_model_path = os.path.join(DATA_FILE_ROOT, 'params_prior.pt')
-    QaA_model_path = os.path.join(DATA_FILE_ROOT, 'params_qa.pt')
-    orchestrator = Prior.init_inference_model(prior_model_path, QaA_model_path, DEVICE=DEVICE)
-    orchestrator.to(DEVICE)
-    orchestrator.eval()
-    piano_arranger = DisentangleVAE.init_model(torch.device('cuda')).cuda()
-    piano_arranger.load_state_dict(torch.load(os.path.join(DATA_FILE_ROOT, 'params_reharmonizer.pt')))
-    print('Finished.')
-    return piano_arranger, orchestrator, (acc_pool, edge_weights, texture_filter), (REF, REF_PROG, REF_MIX)
-
-
+## Function called in gen_sample_preload
 def load_premise_preload(DATA_FILE_ROOT, DEVICE):
     """Load AccoMontage Search Space"""
     print('Loading AccoMontage piano texture search space. This may take 1 or 2 minutes ...')
+    #load POP909 phrase data
     data = np.load(os.path.join(DATA_FILE_ROOT, 'phrase_data.npz'), allow_pickle=True)
     melody = data['melody']
     acc = data['acc']
@@ -80,15 +36,16 @@ def load_premise_preload(DATA_FILE_ROOT, DEVICE):
     for LEN in tqdm(range(2, 13)):
         (mel, acc_, chord_, vel_, cc_, song_reference) = find_by_length(melody, acc, chord, vel, cc, LEN)
         acc_pool[LEN] = (mel, acc_, chord_, vel_, cc_, song_reference)
+    del melody, acc, chord, vel, cc
+    gc.collect()
     texture_filter = get_texture_filter(acc_pool)
-    edge_weights=np.load(os.path.join(DATA_FILE_ROOT, 'edge_weights.npz'), allow_pickle=True)
+
+    #load pre-computed transition score
+    edge_weights = np.load(os.path.join(DATA_FILE_ROOT, 'edge_weights.npz'), allow_pickle=True)
 
     """Load Q&A Prompt Search Space"""
     print('loading orchestration prompt search space ...')
-    slakh_dir = os.path.join(DATA_FILE_ROOT, 'Slakh2100_inference_set')
-
     print('--- Creating REF ---') #can save and load to save time
-
     def load_lists(file_path):
         with open(file_path, 'rb') as f:
             loaded_lists = pickle.load(f)
@@ -100,19 +57,21 @@ def load_premise_preload(DATA_FILE_ROOT, DEVICE):
     """Initialize orchestration model (Prior + Q&A)"""
     print('Initialize model ...')
     prior_model_path = os.path.join(DATA_FILE_ROOT, 'params_prior.pt')
-    QaA_model_path = os.path.join(DATA_FILE_ROOT, 'params_qa.pt')
-    orchestrator = Prior.init_inference_model(prior_model_path, QaA_model_path, DEVICE=DEVICE)
+    QA_model_path = os.path.join(DATA_FILE_ROOT, 'params_qa.pt')
+    orchestrator = Prior.init_inference_model(prior_model_path, QA_model_path, DEVICE=DEVICE)
     orchestrator.to(DEVICE)
     orchestrator.eval()
-    piano_arranger = DisentangleVAE.init_model(torch.device('cuda')).cuda()
+    piano_arranger = DisentangleVAE.init_model(torch.device(DEVICE)).cuda()
     piano_arranger.load_state_dict(torch.load(os.path.join(DATA_FILE_ROOT, 'params_reharmonizer.pt')))
     print('Finished.')
     return piano_arranger, orchestrator, (acc_pool, edge_weights, texture_filter), (REF, REF_PROG, REF_MIX)
 
-
+## Function called in gen_sample_preload
+# note_shift == pickup beat
 def read_lead_sheet(DEMO_ROOT, SONG_NAME, SEGMENTATION, NOTE_SHIFT, MIDI_FILE, melody_track_ID=0):
     melody_roll, chord_roll = cvt.leadsheet2matrix(os.path.join(DEMO_ROOT, SONG_NAME, MIDI_FILE), melody_track_ID)
     assert(len(melody_roll == len(chord_roll)))
+    # If pick up note at beat0, then shift the starting point
     if NOTE_SHIFT != 0:
         melody_roll = melody_roll[int(NOTE_SHIFT*4):, :]
         chord_roll = chord_roll[int(NOTE_SHIFT*4):, :]
@@ -131,8 +90,8 @@ def read_lead_sheet(DEMO_ROOT, SONG_NAME, SEGMENTATION, NOTE_SHIFT, MIDI_FILE, m
     midi_len = len(LEADSHEET)//16
     anno_len = sum([item[1] for item in query_phrases])
     if  midi_len > anno_len:
-        LEADSHEET = LEADSHEET[: anno_len*16]
-        CHORD_TABLE = CHORD_TABLE[: anno_len*4]
+        LEADSHEET = LEADSHEET[:anno_len*16]
+        CHORD_TABLE = CHORD_TABLE[:anno_len*4]
         print(f'Mismatch warning: Detect {midi_len} bars in the lead sheet (MIDI) and {anno_len} bars in the provided phrase annotation. The lead sheet is truncated to {anno_len} bars.')
     elif midi_len < anno_len:
         pad_len = (anno_len - midi_len)*16
@@ -152,7 +111,7 @@ def read_lead_sheet(DEMO_ROOT, SONG_NAME, SEGMENTATION, NOTE_SHIFT, MIDI_FILE, m
     
     return (LEADSHEET, CHORD_TABLE, melody_queries, query_phrases)
 
-
+## Function called in gen_sample_preload
 def piano_arrangement(pianoRoll, chord_table, melody_queries, query_phrases, acc_pool, edge_weights, texture_filter, piano_arranger, PREFILTER, tempo=100):
     print('Phrasal Unit selection begins:\n\t', f'{len(query_phrases)} phrases in the lead sheet;\n\t', f'set note density filter: {PREFILTER}.')
     phrase_indice, chord_shift = dp_search( melody_queries, 
@@ -169,7 +128,7 @@ def piano_arrangement(pianoRoll, chord_table, melody_queries, query_phrases, acc
     print('Piano accompaiment generated!')
     return midi_recon, acc
 
-
+## Function called in gen_sample_preload
 def prompt_sampling(acc_piano, REF, REF_PROG, REF_MIX, DEVICE='cuda:0'):
     ref_mix = torch.from_numpy(compute_pr_feat(acc_piano[0:1])[-1]).to(DEVICE)
     sim_func = torch.nn.CosineSimilarity(dim=-1)

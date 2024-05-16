@@ -5,13 +5,15 @@ import pytorch_lightning as pl
 import math
 import os
 import pickle
+import pdb
 
 from input_representation import InputRepresentation
 from vocab import RemiVocab, DescriptionVocab
 from constants import (
   PAD_TOKEN, BOS_TOKEN, EOS_TOKEN, BAR_KEY, POSITION_KEY,
   TIME_SIGNATURE_KEY, INSTRUMENT_KEY, CHORD_KEY,
-  NOTE_DENSITY_KEY, MEAN_PITCH_KEY, MEAN_VELOCITY_KEY, MEAN_DURATION_KEY
+  NOTE_DENSITY_KEY, MEAN_PITCH_KEY, MEAN_VELOCITY_KEY, MEAN_DURATION_KEY,
+  RHYTHM_INTENSITY_KEY
 )
 
 CONTROL= os.getenv('CONTROL','./arrange/desc/description_honest.txt')
@@ -437,6 +439,7 @@ class MidiDataset(IterableDataset):
       MEAN_PITCH_KEY: meta,
       MEAN_VELOCITY_KEY: meta,
       MEAN_DURATION_KEY: meta,
+      RHYTHM_INTENSITY_KEY: meta
     }
     return [token for token in desc if len(token.split('_')) == 0 or valid_keys[token.split('_')[0]]]
 
@@ -445,29 +448,29 @@ class MidiDataset(IterableDataset):
     if self.cache_path and self.use_cache:
       cache_file = os.path.join(self.cache_path, name)
 
+    #try:
+    #  # Try to load the file in case it's already in the cache
+    #  sample = pickle.load(open(cache_file, 'rb'))
+    #except Exception:
+    #  # If there's no cached version, compute the representations
     try:
-      # Try to load the file in case it's already in the cache
-      sample = pickle.load(open(cache_file, 'rb'))
-    except Exception:
-      # If there's no cached version, compute the representations
-      try:
-        rep = InputRepresentation(file, strict=True)
-        events = rep.get_remi_events()
-        description = rep.get_description()
-      except Exception as err:
-        raise ValueError(f'Unable to load file {file}') from err
+      rep = InputRepresentation(file, strict=True)
+      events = rep.get_remi_events()
+      description = rep.get_description()
+    except Exception as err:
+      raise ValueError(f'Unable to load file {file}') from err
 
-      sample = {
-        'events': events,
-        'description': description
-      }
+    sample = {
+      'events': events,
+      'description': description
+    }
 
-      if self.use_cache:
-        # Try to store the computed representation in the cache directory
-        try:
-          pickle.dump(sample, open(cache_file, 'wb'))
-        except Exception as err:
-          print('Unable to cache file:', str(err))
+      #if self.use_cache:
+      #  # Try to store the computed representation in the cache directory
+      #  try:
+      #    pickle.dump(sample, open(cache_file, 'wb'))
+      #  except Exception as err:
+      #    print('Unable to cache file:', str(err))
 
     if self.description_flavor in ['latent', 'both']:
       latents, codes = self.get_latent_representation(sample['events'], name)
@@ -588,7 +591,6 @@ class MidiDataset_Desc(IterableDataset):
     self.split = _get_split(self.files, worker_info)
 
     split_len = len(self.split)
-    #split_len = 1
     for i in range(split_len):
       try:
         current_file = self.load_file(self.split[i])
@@ -786,6 +788,7 @@ class MidiDataset_Desc(IterableDataset):
       MEAN_PITCH_KEY: meta,
       MEAN_VELOCITY_KEY: meta,
       MEAN_DURATION_KEY: meta,
+      RHYTHM_INTENSITY_KEY: meta
     }
     return [token for token in desc if len(token.split('_')) == 0 or valid_keys[token.split('_')[0]]]
 
@@ -800,6 +803,7 @@ class MidiDataset_Desc(IterableDataset):
     #print(events)
     #file_path = 'arrange/desc/description_honest.txt'
     file_path = CONTROL
+    print(file_path)
     description = []
     with open(file_path, 'r') as file:
       # Read the content of the file

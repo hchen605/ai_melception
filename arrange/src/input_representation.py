@@ -20,6 +20,7 @@ from constants import (
   MEAN_PITCH_KEY,
   MEAN_VELOCITY_KEY,
   MEAN_DURATION_KEY,
+  RHYTHM_INTENSITY_KEY,
   # discretization parameters
   DEFAULT_POS_PER_QUARTER,
   DEFAULT_VELOCITY_BINS,
@@ -29,7 +30,8 @@ from constants import (
   DEFAULT_MEAN_VELOCITY_BINS,
   DEFAULT_MEAN_PITCH_BINS,
   DEFAULT_MEAN_DURATION_BINS,
-  DEFAULT_RESOLUTION
+  DEFAULT_RESOLUTION,
+  DEFAULT_RHYTHM_INTENSITY
 )
 
 # define "Item" for general storage
@@ -92,6 +94,7 @@ class InputRepresentation():
     if strict and len(self.note_items) == 0:
       raise ValueError("Invalid MIDI file: No notes found, empty file.")
 
+  # Parsing MIDI file
   # read notes and tempo changes from midi (assume there is only one track)
   def _read_items(self):
     # note
@@ -140,11 +143,12 @@ class InputRepresentation():
     times, tempi = self.pm.get_tempo_changes()
     for time, tempo in zip(times, tempi):
       self.tempo_items.append(Item(
-        name='Tempo',
-        start=time,
-        end=None,
-        velocity=None,
-        pitch=int(tempo)))
+                                  name='Tempo',
+                                  start=time,
+                                  end=None,
+                                  velocity=None,
+                                  pitch=int(tempo)
+                                ))
     self.tempo_items.sort(key=lambda x: x.start)
     # expand to all beat
     max_tick = self.pm.time_to_tick(self.pm.get_end_time())
@@ -198,23 +202,24 @@ class InputRepresentation():
     output = []
     for chord in chords:
       output.append(Item(
-        name='Chord',
-        start=self.pm.time_to_tick(chord[0]),
-        end=self.pm.time_to_tick(chord[1]),
-        velocity=None,
-        pitch=chord[2].split('/')[0]))
+                        name='Chord',
+                        start=self.pm.time_to_tick(chord[0]),
+                        end=self.pm.time_to_tick(chord[1]),
+                        velocity=None,
+                        pitch=chord[2].split('/')[0]
+                      ))
     if len(output) == 0 or output[0].start > 0:
       if len(output) == 0:
         end = self.pm.time_to_tick(self.pm.get_end_time())
       else:
         end = output[0].start
       output.append(Item(
-        name='Chord',
-        start=0,
-        end=end,
-        velocity=None,
-        pitch='N:N'
-      ))
+                        name='Chord',
+                        start=0,
+                        end=end,
+                        velocity=None,
+                        pitch='N:N'
+                      ))
     self.chords = output
     return self.chords
 
@@ -232,11 +237,11 @@ class InputRepresentation():
         'Note': 2
       }
       return (
-        item.start, # order by time
-        type_priority[item.name], # chord events first, then tempo events, then note events
-        -1 if item.instrument == 'drum' else item.instrument, # order by instrument
-        item.pitch # order by note pitch
-      )
+            item.start, # order by time
+            type_priority[item.name], # chord events first, then tempo events, then note events
+            -1 if item.instrument == 'drum' else item.instrument, # order by instrument
+            item.pitch # order by note pitch
+          )
 
     items.sort(key=_get_key)
     downbeats = self.pm.get_downbeats()
@@ -284,7 +289,7 @@ class InputRepresentation():
     if time_sig is None:
       time_sig = self._get_time_signature(start)
     quarters_per_bar = 4 * time_sig.numerator / time_sig.denominator
-    positions_per_bar = int(DEFAULT_POS_PER_QUARTER * quarters_per_bar)
+    positions_per_bar = int(DEFAULT_POS_PER_QUARTER * quarters_per_bar)  # 48???
     return positions_per_bar
   
   def tick_to_position(self, tick):
@@ -303,111 +308,144 @@ class InputRepresentation():
       if positions_per_bar <= 0:
         raise ValueError('Invalid REMI file: There must be at least 1 position per bar.')
 
+      # Bar
       events.append(Event(
-        name=BAR_KEY,
-        time=None, 
-        value='{}'.format(n_downbeat),
-        text='{}'.format(n_downbeat)))
+                        name=BAR_KEY,
+                        time=None, 
+                        value='{}'.format(n_downbeat),
+                        text='{}'.format(n_downbeat)
+                      ))
 
+      # time signature
       time_sig = self._get_time_signature(bar_st)
       events.append(Event(
-        name=TIME_SIGNATURE_KEY,
-        time=None,
-        value='{}/{}'.format(time_sig.numerator, time_sig.denominator),
-        text='{}/{}'.format(time_sig.numerator, time_sig.denominator)
-      ))
+                        name=TIME_SIGNATURE_KEY,
+                        time=None,
+                        value='{}/{}'.format(time_sig.numerator, time_sig.denominator),
+                        text='{}/{}'.format(time_sig.numerator, time_sig.denominator)
+                      ))
 
+      # chord position within bar & info
       if current_chord is not None:
         events.append(Event(
-          name=POSITION_KEY, 
-          time=0,
-          value='{}'.format(0),
-          text='{}/{}'.format(1, positions_per_bar)))
+                          name=POSITION_KEY, 
+                          time=0,
+                          value='{}'.format(0),
+                          text='{}/{}'.format(1, positions_per_bar)
+                        ))
         events.append(Event(
-          name=CHORD_KEY,
-          time=current_chord.start,
-          value=current_chord.pitch,
-          text='{}'.format(current_chord.pitch)))
+                          name=CHORD_KEY,
+                          time=current_chord.start,
+                          value=current_chord.pitch,
+                          text='{}'.format(current_chord.pitch)
+                        ))
       
+      # tempo position within bar & 
       if current_tempo is not None:
         events.append(Event(
-          name=POSITION_KEY, 
-          time=0,
-          value='{}'.format(0),
-          text='{}/{}'.format(1, positions_per_bar)))
+                          name=POSITION_KEY, 
+                          time=0,
+                          value='{}'.format(0),
+                          text='{}/{}'.format(1, positions_per_bar)
+                        ))
         tempo = current_tempo.pitch
         index = np.argmin(abs(DEFAULT_TEMPO_BINS-tempo))
         events.append(Event(
-          name=TEMPO_KEY,
-          time=current_tempo.start,
-          value=index,
-          text='{}/{}'.format(tempo, DEFAULT_TEMPO_BINS[index])))
+                          name=TEMPO_KEY,
+                          time=current_tempo.start,
+                          value=index,
+                          text='{}/{}'.format(tempo, DEFAULT_TEMPO_BINS[index])
+                        ))
       
       quarters_per_bar = 4 * time_sig.numerator / time_sig.denominator
       ticks_per_bar = self.pm.resolution * quarters_per_bar
-      flags = np.linspace(bar_st, bar_st + ticks_per_bar, positions_per_bar, endpoint=False)
+      flags = np.linspace(bar_st, bar_st + ticks_per_bar, positions_per_bar, endpoint=False) # tick numbers aligned to positions
+      rhythm_raw = np.zeros(positions_per_bar) # ***
       for item in self.groups[i][1:-1]:
         # position
-        index = np.argmin(abs(flags-item.start))
+        index = np.argmin(abs(flags-item.start))  # ??? always=0??
         pos_event = Event(
-          name=POSITION_KEY, 
-          time=item.start,
-          value='{}'.format(index),
-          text='{}/{}'.format(index+1, positions_per_bar))
+                        name=POSITION_KEY, 
+                        time=item.start,
+                        value='{}'.format(index),
+                        text='{}/{}'.format(index+1, positions_per_bar)
+                      )
 
+        # 1. Note related
         if item.name == 'Note':
           events.append(pos_event)
-          # instrument
+          rhythm_raw[index] = 1 # ***
+          # get instrument name
           if item.instrument == 'drum':
             name = 'drum'
           else:
             name = pretty_midi.program_to_instrument_name(item.instrument)
           events.append(Event(
-            name=INSTRUMENT_KEY,
-            time=item.start, 
-            value=name,
-            text='{}'.format(name)))
+                            name=INSTRUMENT_KEY,
+                            time=item.start, 
+                            value=name,
+                            text='{}'.format(name)
+                          ))
           # pitch
           events.append(Event(
-            name=PITCH_KEY,
-            time=item.start, 
-            value='drum_{}'.format(item.pitch) if name == 'drum' else item.pitch,
-            text='{}'.format(pretty_midi.note_number_to_name(item.pitch))))
-          # velocity
+                            name=PITCH_KEY,
+                            time=item.start, 
+                            value='drum_{}'.format(item.pitch) if name == 'drum' else item.pitch,
+                            text='{}'.format(pretty_midi.note_number_to_name(item.pitch))
+                          ))
+          # velocity (original / quantized)
           velocity_index = np.argmin(abs(DEFAULT_VELOCITY_BINS - item.velocity))
           events.append(Event(
-            name=VELOCITY_KEY,
-            time=item.start, 
-            value=velocity_index,
-            text='{}/{}'.format(item.velocity, DEFAULT_VELOCITY_BINS[velocity_index])))
-          # duration
+                            name=VELOCITY_KEY,
+                            time=item.start, 
+                            value=velocity_index,
+                            text='{}/{}'.format(item.velocity, DEFAULT_VELOCITY_BINS[velocity_index])
+                          ))
+          # duration (in position range)
           duration = self.tick_to_position(item.end - item.start)
           index = np.argmin(abs(DEFAULT_DURATION_BINS-duration))
           events.append(Event(
-            name=DURATION_KEY,
-            time=item.start,
-            value=index,
-            text='{}/{}'.format(duration, DEFAULT_DURATION_BINS[index])))
+                            name=DURATION_KEY,
+                            time=item.start,
+                            value=index,
+                            text='{}/{}'.format(duration, DEFAULT_DURATION_BINS[index])
+                          ))
+
+        # 2. Chord related
         elif item.name == 'Chord':
           if current_chord is None or item.pitch != current_chord.pitch:
             events.append(pos_event)
             events.append(Event(
-              name=CHORD_KEY, 
-              time=item.start,
-              value=item.pitch,
-              text='{}'.format(item.pitch)))
+                              name=CHORD_KEY, 
+                              time=item.start,
+                              value=item.pitch,
+                              text='{}'.format(item.pitch)
+                            ))
             current_chord = item
+
+        # 3. Tempo related
         elif item.name == 'Tempo':
           if current_tempo is None or item.pitch != current_tempo.pitch:
             events.append(pos_event)
             tempo = item.pitch
             index = np.argmin(abs(DEFAULT_TEMPO_BINS-tempo))
             events.append(Event(
-              name=TEMPO_KEY,
-              time=item.start,
-              value=index,
-              text='{}/{}'.format(tempo, DEFAULT_TEMPO_BINS[index])))
+                              name=TEMPO_KEY,
+                              time=item.start,
+                              value=index,
+                              text='{}/{}'.format(tempo, DEFAULT_TEMPO_BINS[index])
+                            ))
             current_tempo = item
+      # ***
+      intensity = np.round(np.mean(rhythm_raw), 3)
+      rhythm_index = np.argmin(abs(DEFAULT_RHYTHM_INTENSITY-intensity))
+      events.append(Event(
+                        name=RHYTHM_INTENSITY_KEY,
+                        time=None,  # ??
+                        value=rhythm_index,
+                        text='{}/{}'.format(intensity, DEFAULT_RHYTHM_INTENSITY[rhythm_index])
+      ))
+      
     
     return [f'{e.name}_{e.value}' for e in events]
 
@@ -419,86 +457,110 @@ class InputRepresentation():
     events = []
     n_downbeat = 0
     current_chord = None
-
     for i in range(len(self.groups)):
       bar_st, bar_et = self.groups[i][0], self.groups[i][-1]
       n_downbeat += 1
-      time_sig = self._get_time_signature(bar_st)
-      positions_per_bar = self._get_positions_per_bar(time_sig=time_sig)
+      time_sig = self._get_time_signature(bar_st)  # time signature in midi format
+      positions_per_bar = self._get_positions_per_bar(time_sig=time_sig)  # pos_per_quarter * quarters_per_bar = 48
       if positions_per_bar <= 0:
         raise ValueError('Invalid REMI file: There must be at least 1 position in each bar.')
 
       events.append(Event(
-        name=BAR_KEY,
-        time=None, 
-        value='{}'.format(n_downbeat),
-        text='{}'.format(n_downbeat)))
+                        name=BAR_KEY,
+                        time=None, 
+                        value='{}'.format(n_downbeat),
+                        text='{}'.format(n_downbeat)
+                      ))
       
       if not omit_time_sig:
         events.append(Event(
-          name=TIME_SIGNATURE_KEY,
-          time=None,
-          value='{}/{}'.format(time_sig.numerator, time_sig.denominator),
-          text='{}/{}'.format(time_sig.numerator, time_sig.denominator),
-        ))
+                          name=TIME_SIGNATURE_KEY,
+                          time=None,
+                          value='{}/{}'.format(time_sig.numerator, time_sig.denominator),
+                          text='{}/{}'.format(time_sig.numerator, time_sig.denominator),
+                        ))
 
       if not omit_meta:
-        notes = [item for item in self.groups[i][1:-1] if item.name == 'Note']
-        n_notes = len(notes)
-        velocities = np.array([item.velocity for item in notes])
-        pitches = np.array([item.pitch for item in notes])
-        durations = np.array([item.end - item.start for item in notes])
+        notes = [item for item in self.groups[i][1:-1] if item.name == 'Note']  # all notes
+        n_notes = len(notes)  # get number of notes
+        velocities = np.array([item.velocity for item in notes])  # get all velocity values
+        pitches = np.array([item.pitch for item in notes])  # get all pitch
+        durations = np.array([item.end - item.start for item in notes])  # get all note duration
 
-        note_density = n_notes/positions_per_bar
+        # note density (Note Density)
+        note_density = n_notes/positions_per_bar  # note density by position
         index = np.argmin(abs(DEFAULT_NOTE_DENSITY_BINS-note_density))
         events.append(Event(
-          name=NOTE_DENSITY_KEY,
-          time=None,
-          value=index,
-          text='{:.2f}/{:.2f}'.format(note_density, DEFAULT_NOTE_DENSITY_BINS[index])
-        ))
+                          name=NOTE_DENSITY_KEY,
+                          time=None,
+                          value=index,
+                          text='{:.2f}/{:.2f}'.format(note_density, DEFAULT_NOTE_DENSITY_BINS[index])
+                        ))
 
+        # rhythm intensity (Rhythm Intensity) ***
+        rhythm_raw = np.zeros(positions_per_bar)
+        quarters_per_bar = 4 * time_sig.numerator / time_sig.denominator
+        ticks_per_bar = self.pm.resolution * quarters_per_bar
+        flags = np.linspace(bar_st, bar_st + ticks_per_bar, positions_per_bar, endpoint=False) # tick numbers aligned to positions
+        for item in self.groups[i][1:-1]:
+          index = np.argmin(abs(flags-item.start))
+          if item.name == 'Note':
+            rhythm_raw[index] = 1 # ***
+        intensity = np.round(np.mean(rhythm_raw), 3)
+        rhythm_index = np.argmin(abs(DEFAULT_RHYTHM_INTENSITY-intensity))
+        events.append(Event(
+                          name=RHYTHM_INTENSITY_KEY,
+                          time=None,
+                          value=rhythm_index,
+                          text='{}/{}'.format(intensity, DEFAULT_RHYTHM_INTENSITY[rhythm_index])
+        ))
+      
+        # velocity (Mean Velocity), bar level
         # will be 0 if there's no notes
         mean_velocity = velocities.mean() if len(velocities) > 0 else np.nan
         index = np.argmin(abs(DEFAULT_MEAN_VELOCITY_BINS-mean_velocity))
         events.append(Event(
-          name=MEAN_VELOCITY_KEY,
-          time=None,
-          value=index if mean_velocity != np.nan else 'NaN',
-          text='{:.2f}/{:.2f}'.format(mean_velocity, DEFAULT_MEAN_VELOCITY_BINS[index])
-        ))
+                          name=MEAN_VELOCITY_KEY,
+                          time=None,
+                          value=index if mean_velocity != np.nan else 'NaN',
+                          text='{:.2f}/{:.2f}'.format(mean_velocity, DEFAULT_MEAN_VELOCITY_BINS[index])
+                        ))
 
+        # pitch (Mean Pitch), bar level
         # will be 0 if there's no notes
         mean_pitch = pitches.mean() if len(pitches) > 0 else np.nan
         index = np.argmin(abs(DEFAULT_MEAN_PITCH_BINS-mean_pitch))
         events.append(Event(
-          name=MEAN_PITCH_KEY,
-          time=None,
-          value=index if mean_pitch != np.nan else 'NaN',
-          text='{:.2f}/{:.2f}'.format(mean_pitch, DEFAULT_MEAN_PITCH_BINS[index])
-        ))
+                          name=MEAN_PITCH_KEY,
+                          time=None,
+                          value=index if mean_pitch != np.nan else 'NaN',
+                          text='{:.2f}/{:.2f}'.format(mean_pitch, DEFAULT_MEAN_PITCH_BINS[index])
+                        ))
 
+        # duration (Mean Duration), bar level
         # will be 1 if there's no notes
         mean_duration = durations.mean() if len(durations) > 0 else np.nan
         index = np.argmin(abs(DEFAULT_MEAN_DURATION_BINS-mean_duration))
         events.append(Event(
-          name=MEAN_DURATION_KEY,
-          time=None,
-          value=index if mean_duration != np.nan else 'NaN',
-          text='{:.2f}/{:.2f}'.format(mean_duration, DEFAULT_MEAN_DURATION_BINS[index])
-        ))
+                          name=MEAN_DURATION_KEY,
+                          time=None,
+                          value=index if mean_duration != np.nan else 'NaN',
+                          text='{:.2f}/{:.2f}'.format(mean_duration, DEFAULT_MEAN_DURATION_BINS[index])
+                        ))
 
+      # instrument (Instrument_{})
       if not omit_instruments:
         instruments = set([item.instrument for item in notes])
         for instrument in instruments:
           instrument = pretty_midi.program_to_instrument_name(instrument) if instrument != 'drum' else 'drum'
           events.append(Event(
-            name=INSTRUMENT_KEY,
-            time=None,
-            value=instrument,
-            text=instrument
-          ))
+                            name=INSTRUMENT_KEY,
+                            time=None,
+                            value=instrument,
+                            text=instrument
+                          ))
 
+      # chord (Chord_{})
       if not omit_chords:
         chords = [item for item in self.groups[i][1:-1] if item.name == 'Chord']
         if len(chords) == 0 and current_chord is not None:
@@ -510,11 +572,11 @@ class InputRepresentation():
 
         for chord in chords:
           events.append(Event(
-            name=CHORD_KEY, 
-            time=None,
-            value=chord.pitch,
-            text='{}'.format(chord.pitch)
-          ))
+                            name=CHORD_KEY, 
+                            time=None,
+                            value=chord.pitch,
+                            text='{}'.format(chord.pitch)
+                          ))
         
     return [f'{e.name}_{e.value}' for e in events]
 

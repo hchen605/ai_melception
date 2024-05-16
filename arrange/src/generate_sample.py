@@ -1,9 +1,7 @@
 
 import os
-import glob
 import time
 import torch
-import random
 from torch.utils.data import DataLoader
 
 from models.vae import VqVaeModule
@@ -33,13 +31,14 @@ VAE_CHECKPOINT = os.getenv('VAE_CHECKPOINT', None)
 BATCH_SIZE = int(os.getenv('BATCH_SIZE', 1))
 VERBOSE = int(os.getenv('VERBOSE', 0))
 
-def reconstruct_sample(model, batch, 
-  initial_context=1, 
-  output_dir=None, 
-  max_iter=-1, 
-  max_bars=-1,
-  verbose=0,
-):
+def reconstruct_sample(model, 
+                      batch, 
+                      initial_context=1, 
+                      output_dir=None, 
+                      max_iter=-1, 
+                      max_bars=-1,
+                      verbose=0,
+                    ):
   batch_size, seq_len = batch['input_ids'].shape[:2]
 
   batch_ = { key: batch[key][:, :initial_context] for key in ['input_ids', 'bar_ids', 'position_ids'] }
@@ -87,10 +86,10 @@ def reconstruct_sample(model, batch,
     os.makedirs(output_dir, exist_ok=True)
     for pm, pm_hat, file in zip(pms, pms_hat, batch['files']):
       if verbose:
-        print(f"Saving to {output_dir}/{file}")
+        #print(f"Saving to {output_dir}/{file}")
+        print(f"Saving to {output_dir}/test.midi")
       #pm.write(os.path.join(output_dir, 'gt', file))
-      pm_hat.write(os.path.join(output_dir, file))
-
+      pm_hat.write(os.path.join(output_dir, 'test.midi'))  # file
   return events
 
 
@@ -135,41 +134,41 @@ def main():
   if MAX_N_FILES > 0:
     midi_files = midi_files[:MAX_N_FILES]
 
-
   description_options = None
   if MODEL in ['figaro-no-inst', 'figaro-no-chord', 'figaro-no-meta']:
     description_options = model.description_options
 
   dataset = MidiDataset_Desc(
-    midi_files,
-    max_len=-1,
-    description_flavor=model.description_flavor,
-    description_options=description_options,
-    max_bars=model.context_size,
-    vae_module=vae_module
-  )
+                            midi_files,
+                            max_len=-1,
+                            description_flavor=model.description_flavor,
+                            description_options=description_options,
+                            max_bars=model.context_size,
+                            vae_module=vae_module
+                          )
 
   #print('------ gen test 1 --------')
 
-  start_time = time.time()
+  #start_time = time.time()
   coll = SeqCollator(context_size=-1)
   dl = DataLoader(dataset, batch_size=BATCH_SIZE, collate_fn=coll)
 
   if MAKE_MEDLEYS:
     dl = medley_iterator(dl, 
-      n_pieces=N_MEDLEY_BARS, 
-      n_bars=N_MEDLEY_BARS, 
-      description_flavor=model.description_flavor
-    )
+                        n_pieces=N_MEDLEY_BARS, 
+                        n_bars=N_MEDLEY_BARS, 
+                        description_flavor=model.description_flavor
+                      )
   
   with torch.no_grad():
     for batch in dl:
-      reconstruct_sample(model, batch, 
-        output_dir=output_dir, 
-        max_iter=MAX_ITER, 
-        max_bars=max_bars,
-        verbose=VERBOSE,
-      )
+      reconstruct_sample(model, 
+                        batch, 
+                        output_dir=output_dir, 
+                        max_iter=MAX_ITER, 
+                        max_bars=max_bars,
+                        verbose=VERBOSE,
+                      )
 
 if __name__ == '__main__':
   main()

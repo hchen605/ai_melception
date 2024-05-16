@@ -12,7 +12,7 @@ from models.vae import VqVaeModule
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-ROOT_DIR = os.getenv('ROOT_DIR', './lmd_full')
+ROOT_DIR = os.getenv('ROOT_DIR', '/ssddata2/joann/lmd_full')
 OUTPUT_DIR = os.getenv('OUTPUT_DIR', './results')
 LOGGING_DIR = os.getenv('LOGGING_DIR', './logs')
 MAX_N_FILES = int(os.getenv('MAX_N_FILES', -1))

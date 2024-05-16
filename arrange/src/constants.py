@@ -23,6 +23,7 @@ DEFAULT_NOTE_DENSITY_BINS = np.linspace(0, 12, 32+1)
 DEFAULT_MEAN_VELOCITY_BINS = np.linspace(0, 128, 32+1)
 DEFAULT_MEAN_PITCH_BINS = np.linspace(0, 128, 32+1)
 DEFAULT_MEAN_DURATION_BINS = np.logspace(0, 7, 32+1, base=2) # log space between 1 and 128 positions (~2.5 bars)
+DEFAULT_RHYTHM_INTENSITY = [0.2, 0.25, 0.32, 0.38, 0.44, 0.5, 0.63]
 
 # parameters for output
 DEFAULT_RESOLUTION = 480
@@ -52,3 +53,4 @@ NOTE_DENSITY_KEY = 'Note Density'
 MEAN_PITCH_KEY = 'Mean Pitch'
 MEAN_VELOCITY_KEY = 'Mean Velocity'
 MEAN_DURATION_KEY = 'Mean Duration'
+RHYTHM_INTENSITY_KEY = 'Rhythm Intensity'

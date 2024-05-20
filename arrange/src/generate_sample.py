@@ -87,9 +87,9 @@ def reconstruct_sample(model,
     for pm, pm_hat, file in zip(pms, pms_hat, batch['files']):
       if verbose:
         #print(f"Saving to {output_dir}/{file}")
-        print(f"Saving to {output_dir}/test.midi")
+        print(f"Saving to {output_dir}/rhythm.midi")
       #pm.write(os.path.join(output_dir, 'gt', file))
-      pm_hat.write(os.path.join(output_dir, 'test.midi'))  # file
+      pm_hat.write(os.path.join(output_dir, 'rhythm.midi'))  # file
   return events
 
 

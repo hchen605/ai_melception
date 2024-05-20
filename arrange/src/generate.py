@@ -15,7 +15,7 @@ from input_representation import remi2midi
 MODEL = os.getenv('MODEL', '')
 
 #ROOT_DIR = os.getenv('ROOT_DIR', './lmd_full')
-ROOT_DIR = os.getenv('ROOT_DIR', './data')
+ROOT_DIR = os.getenv('ROOT_DIR', '/ssddata2/joann/lmd_full')
 OUTPUT_DIR = os.getenv('OUTPUT_DIR', './samples_hh')
 MAX_N_FILES = int(float(os.getenv('MAX_N_FILES', -1)))
 MAX_ITER = int(os.getenv('MAX_ITER', 16_000))
@@ -25,7 +25,7 @@ MAKE_MEDLEYS = os.getenv('MAKE_MEDLEYS', 'False') == 'True'
 N_MEDLEY_PIECES = int(os.getenv('N_MEDLEY_PIECES', 2))
 N_MEDLEY_BARS = int(os.getenv('N_MEDLEY_BARS', 16))
   
-CHECKPOINT = os.getenv('CHECKPOINT', None)
+CHECKPOINT = os.getenv('CHECKPOINT', './results/figaro-expert/step=53000-valid_loss=1.07.ckpt')
 VAE_CHECKPOINT = os.getenv('VAE_CHECKPOINT', None)
 BATCH_SIZE = int(os.getenv('BATCH_SIZE', 1))
 VERBOSE = int(os.getenv('VERBOSE', 0))
@@ -46,7 +46,7 @@ def reconstruct_sample(model, batch,
   if model.description_flavor in ['latent', 'both']:
     batch_['latents'] = batch['latents']
 
-  #print(batch_['description'])
+  print(batch_['description'])
   print('------ gen test 2 --------')
 
   max_len = seq_len + 1024
@@ -120,8 +120,8 @@ def main():
 
   print('------ gen test 0 --------')
 
-  #midi_files = glob.glob(os.path.join(ROOT_DIR, '**/*.mid'), recursive=True)
-  midi_files = glob.glob(ROOT_DIR + '/*.mid', recursive=True)
+  midi_files = glob.glob(os.path.join(ROOT_DIR, '**/*.mid'), recursive=True)
+  ##midi_files = glob.glob(ROOT_DIR + '/*.mid', recursive=True)
   #print(midi_files)
   
   # dm = model.get_datamodule(midi_files, vae_module=vae_module)
@@ -138,7 +138,7 @@ def main():
     description_options = model.description_options
 
   dataset = MidiDataset(
-    midi_files,
+    midi_files[:5],
     max_len=-1,
     description_flavor=model.description_flavor,
     description_options=description_options,
@@ -161,6 +161,7 @@ def main():
   
   with torch.no_grad():
     for batch in dl:
+      print('output to {}'.format(output_dir))
       reconstruct_sample(model, batch, 
         output_dir=output_dir, 
         max_iter=MAX_ITER, 

@@ -221,12 +221,12 @@ class MidiDataset(IterableDataset):
     self.bar_token_mask = bar_token_mask
     self.bar_token_idx = bar_token_idx
 
-    if CACHE_PATH:
-      self.cache_path = os.path.join(CACHE_PATH, InputRepresentation.version())
-      os.makedirs(self.cache_path, exist_ok=True)
-      # print(f"Using cache path: {self.cache_path}")
-    else:
-      self.cache_path = None
+    #if CACHE_PATH:
+    #  self.cache_path = os.path.join(CACHE_PATH, InputRepresentation.version())
+    #  os.makedirs(self.cache_path, exist_ok=True)
+    #  print(f"Using cache path: {self.cache_path}")
+    #else:
+    self.cache_path = None
 
     if self.description_flavor in ['latent', 'both'] and LATENT_CACHE_PATH:
       self.latent_cache_path = LATENT_CACHE_PATH

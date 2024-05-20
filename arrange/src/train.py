@@ -9,6 +9,7 @@ import pytorch_lightning as pl
 
 from models.seq2seq import Seq2SeqModule
 from models.vae import VqVaeModule
+import pdb
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
@@ -27,8 +28,8 @@ D_LATENT = int(os.getenv('D_LATENT', 1024))
 CHECKPOINT = os.getenv('CHECKPOINT', None)
 VAE_CHECKPOINT = os.getenv('VAE_CHECKPOINT', None)
 
-BATCH_SIZE = int(os.getenv('BATCH_SIZE', 128))
-TARGET_BATCH_SIZE = int(os.getenv('TARGET_BATCH_SIZE', 512))
+BATCH_SIZE = int(os.getenv('BATCH_SIZE', 16)) # 128
+TARGET_BATCH_SIZE = int(os.getenv('TARGET_BATCH_SIZE', 64))  # 512
 
 EPOCHS = int(os.getenv('EPOCHS', '16'))
 WARMUP_STEPS = int(float(os.getenv('WARMUP_STEPS', 4000)))
@@ -36,7 +37,7 @@ MAX_STEPS = int(float(os.getenv('MAX_STEPS', 1e20)))
 MAX_TRAINING_STEPS = int(float(os.getenv('MAX_TRAINING_STEPS', 100_000)))
 LEARNING_RATE = float(os.getenv('LEARNING_RATE', 1e-4))
 LR_SCHEDULE = os.getenv('LR_SCHEDULE', 'const')
-CONTEXT_SIZE = int(os.getenv('CONTEXT_SIZE', 256))
+CONTEXT_SIZE = int(os.getenv('CONTEXT_SIZE', 263))  # 256 + 7
 
 ACCUMULATE_GRADS = max(1, TARGET_BATCH_SIZE//BATCH_SIZE)
 
@@ -190,7 +191,7 @@ def main():
 
   checkpoint_callback = pl.callbacks.model_checkpoint.ModelCheckpoint(
     monitor='valid_loss',
-    dirpath=os.path.join(OUTPUT_DIR, MODEL),
+    dirpath=os.path.join(OUTPUT_DIR, 'test'), # MODEL
     filename='{step}-{valid_loss:.2f}',
     save_last=True,
     save_top_k=2,
@@ -222,6 +223,7 @@ def main():
     resume_from_checkpoint=CHECKPOINT
   )
 
+  print(model)
   trainer.fit(model, datamodule)
 
 if __name__ == '__main__':

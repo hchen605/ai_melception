@@ -7,6 +7,7 @@ from models.vae import VqVaeModule
 from models.seq2seq import Seq2SeqModule
 from datasets import MidiDataset, SeqCollator
 from utils import medley_iterator
+import pdb
 
 MODEL = os.getenv('MODEL', '')
 
@@ -41,7 +42,7 @@ def reconstruct_sample(model, batch, initial_context=1, output_dir=None, max_ite
   
   if DESC_DIR:
     os.makedirs(DESC_DIR, exist_ok=True)
-  file_path = DESC_DIR + '/test.txt'
+  file_path = DESC_DIR + '/rhythm.txt'
   
   prefix_condition = 'Bar_'
   with open(file_path, 'w') as file:
@@ -109,7 +110,6 @@ def main():
                       )
 
   print('------ Read event/description --------')
-
   #start_time = time.time()
   coll = SeqCollator(context_size=-1)
   dl = DataLoader(dataset, batch_size=BATCH_SIZE, collate_fn=coll)

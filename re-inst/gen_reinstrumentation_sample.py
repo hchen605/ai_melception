@@ -14,13 +14,13 @@ import pretty_midi as pyd
 warnings.filterwarnings("ignore")
 
 POP909_DIR = "./data/POP909"
-SLAKH2100_DIR = "./data/Slakh2100"
-SAVE_DIR = './demo'
+SLAKH2100_DIR = "./re-inst/data/Slakh2100" ##
+SAVE_DIR = './re-inst/demo'  ##
 
 SAMPLE_BAR_LEN = 8
 
-MODEL_DIR = "./checkpoints/Q&A_epoch_029.pt"
-os.environ["CUDA_VISIBLE_DEVICES"] = "3"
+MODEL_DIR = "./re-inst/checkpoints/Q&A_epoch_029.pt"  ## 
+os.environ["CUDA_VISIBLE_DEVICES"] = "0"
 DEVICE = torch.device("cuda" if torch.cuda.is_available() else "cpu") #'cuda:0'
 model = Query_and_reArrange(name='inference_model', device=DEVICE, trf_layers=2)
 model.load_state_dict(torch.load(MODEL_DIR, map_location='cpu'))
@@ -40,7 +40,7 @@ y_prior_set = mixture_function_prior(y_set_loader)
 # get a random x sample
 #IDX = np.random.randint(len(x_set))
 #x = x_set.__getitem__(IDX)
-midi_file_path = 'demo/test/test.mid'
+midi_file_path = './re-inst/demo/test/test.mid'  ##
 midi_data = pyd.PrettyMIDI(midi_file_path)
 _, tempo = midi_data.get_tempo_changes()
 tempo = int(tempo[0])
@@ -48,7 +48,7 @@ x = midi2load(midi_data)
 (x_mix, x_instr, x_fp, x_ft), x_dyn, x_dir = collate_fn_inference(batch = [(x)], device = DEVICE)
 # save x
 #save_path = os.path.join(SAVE_DIR, f"reinstrumentation-{datetime.datetime.now().strftime('%Y%m%d%H%M%S')[2:]}")
-save_path = os.path.join(SAVE_DIR, 'test')
+save_path = os.path.join(SAVE_DIR, 'rhythm') ## test
 if not os.path.exists(save_path):
     os.makedirs(save_path)
 x_recon = dataitem2midi(*x, SLAKH_CLASS_MAPPING, tempo=tempo)

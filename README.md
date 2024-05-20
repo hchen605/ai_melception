@@ -21,7 +21,7 @@ Some demos may be seen at https://www.melception.com/
 ### 0. Gen init output after upload:   
 ```
 cd init   
-CUDA_VISIBLE_DEVICES=$ python gen_sample_preload.py
+python gen_sample_preload.py
 ```
 
 ### 1. Gen control description:   

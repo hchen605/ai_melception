@@ -162,6 +162,7 @@ cython_debug/
 
 *.ckpt
 *.mid
+*.midi
 *.tar.gz
 *.zip
 metrics.csv

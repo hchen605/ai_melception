@@ -1,5 +1,7 @@
 import numpy as np
 
+DEVICE = 'cuda:0'
+
 # parameters for input representation
 DEFAULT_POS_PER_QUARTER = 12
 DEFAULT_VELOCITY_BINS = np.linspace(0, 128, 32+1, dtype=np.int)

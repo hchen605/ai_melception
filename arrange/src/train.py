@@ -12,7 +12,6 @@ import pdb
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-#MODEL_NAME = os.getenv('MODEL_NAME', None)
 N_CODES = 2048  # [VQ-VAE] Codebook size
 N_GROUPS = 16  # [VQ-VAE] Number of groups to split the latent vector into before discretization
 D_MODEL = 512  # Hidden size of the model
@@ -79,6 +78,7 @@ def main(args):
 
 	# load model from checkpoint if available
 	if args.checkpoint:
+		print('load checkpoint')
 		model_class = {
 			'vq-vae': VqVaeModule,
 			'figaro-learned': Seq2SeqModule,
@@ -179,7 +179,7 @@ def main(args):
 		filename='{step}-{valid_loss:.2f}',
 		save_last=True,
 		save_top_k=2,
-		every_n_train_steps=1000,
+		every_n_train_steps= 1000
 	)
 
 	lr_monitor = pl.callbacks.LearningRateMonitor(logging_interval='step')
@@ -187,7 +187,6 @@ def main(args):
 	trainer = pl.Trainer(
 		devices=1,
 		accelerator='gpu',
-		deterministic=True,
 		strategy='dp',
 		profiler='simple',
 		callbacks=[checkpoint_callback, lr_monitor, 
@@ -196,16 +195,17 @@ def main(args):
 		max_epochs=args.epoch,
 		max_steps=MAX_TRAINING_STEPS,
 		log_every_n_steps= 100, #max(100, min(25*ACCUMULATE_GRADS, 200)),
-		val_check_interval= 100, #max(500, min(300*ACCUMULATE_GRADS, 1000)),  #  = 1000 / 500
+		val_check_interval= 1000, #max(500, min(300*ACCUMULATE_GRADS, 1000)),  #  = 1000 / 500 --> runs validation set
 		limit_val_batches=64,
 		auto_scale_batch_size=False,
 		auto_lr_find=False,
-		accumulate_grad_batches=ACCUMULATE_GRADS,
-		#stochastic_weight_avg=True,
+		#accumulate_grad_batches=ACCUMULATE_GRADS,
 		gradient_clip_val=1.0, 
-		#terminate_on_nan=True,
 		detect_anomaly=True,
-		resume_from_checkpoint=args.checkpoint
+		#resume_from_checkpoint=args.checkpoint,
+		enable_checkpointing=True,
+		enable_progress_bar=True,
+		enable_model_summary=True
 	)
 
 	trainer.fit(model, datamodule)

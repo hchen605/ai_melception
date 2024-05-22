@@ -255,7 +255,6 @@ class Seq2SeqModule(pl.LightningModule):
     return loss
   
   def validation_step(self, batch, batch_idx):
-    print('valid step')
     loss, logits = self.get_loss(batch, return_logits=True)
     self.log('valid_loss', loss.detach(), on_step=True, on_epoch=True, prog_bar=False, logger=True, sync_dist=True)
 
@@ -274,6 +273,7 @@ class Seq2SeqModule(pl.LightningModule):
     self.log('valid_ppl', ppl.detach(), on_step=True, on_epoch=True, prog_bar=False, logger=True, sync_dist=True)
     return loss
   
+
   def test_step(self, batch, batch_idx):
     return self.get_loss(batch)
         

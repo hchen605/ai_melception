@@ -21,9 +21,9 @@ VAE_CHECKPOINT = None
 
 WARMUP_STEPS = 4000
 MAX_STEPS = 1e20
-MAX_TRAINING_STEPS = 10000  # Max. number of training iterations
-LR_SCHEDULE = os.getenv('LR_SCHEDULE', 'const')
-CONTEXT_SIZE = 256  # 256 + 7
+MAX_TRAINING_STEPS = 100000  # DON'T CHANGE! Max. number of training iterations.
+LR_SCHEDULE = os.getenv('LR_SCHEDULE', 'const')  # Current: sqrt
+CONTEXT_SIZE = 256
 
 ACCUMULATE_GRADS = 4 # TARGET_BATCH_SIZE//BATCH_SIZE
 
@@ -32,6 +32,7 @@ if device.type == 'cuda':
 	N_WORKERS = min(N_WORKERS, 8*torch.cuda.device_count())  # (20, 8)
 N_WORKERS = int(N_WORKERS)  # 8
 
+ADD_ATTR = {'rhythm_int': False, 'polyphonic': False}
 
 def main(args):
 	### Define available models ###
@@ -51,16 +52,14 @@ def main(args):
 
 	assert args.model in available_models, f'unknown MODEL: {args.model}'
 
-
-	### Create data loaders ###
+	### Load in all midi files ###
 	midi_files = glob.glob(os.path.join(args.root_dir, '**/*.mid'), recursive=True)
-	#if MAX_N_FILES > 0:
-	#	midi_files = midi_files[:MAX_N_FILES]
+	if args.max_n_file > 0:
+		midi_files = midi_files[:args.max_n_file]
 
 	if len(midi_files) == 0:
 		print(f"WARNING: No MIDI files were found at '{args.root_dir}'. Did you download the dataset to the right location?")
 		exit()
-
 
 	MAX_CONTEXT = min(1024, CONTEXT_SIZE)  # 256
 
@@ -69,16 +68,14 @@ def main(args):
 	#	vae_module.cpu()
 	#	vae_module.freeze()
 	#	vae_module.eval()
-
 	#else:
 	vae_module = None
 
 
 	### Create and train model ###
-
 	# load model from checkpoint if available
 	if args.checkpoint:
-		print('load checkpoint')
+		print('load checkpoint: {}'.format(args.checkpoint))
 		model_class = {
 			'vq-vae': VqVaeModule,
 			'figaro-learned': Seq2SeqModule,
@@ -146,17 +143,27 @@ def main(args):
 			),
 			'figaro-no-meta': lambda: Seq2SeqModule(
 				description_flavor='description',
-				description_options={ 'instruments': True, 'chords': True, 'meta': False },
+				description_options={'instruments': True, 'chords': True, 'meta': False, 'rhyt':True, 'poly':True},
 				**seq2seq_kwargs
 			),
 			'figaro-no-inst': lambda: Seq2SeqModule(
 				description_flavor='description',
-				description_options={ 'instruments': False, 'chords': True, 'meta': True },
+				description_options={'instruments': False, 'chords': True, 'meta': True, 'rhyt':True, 'poly':True},
 				**seq2seq_kwargs
 			),
 			'figaro-no-chord': lambda: Seq2SeqModule(
 				description_flavor='description',
-				description_options={ 'instruments': True, 'chords': False, 'meta': True },
+				description_options={'instruments': True, 'chords': False, 'meta': True, 'rhyt':True, 'poly':True},
+				**seq2seq_kwargs
+			),
+			'figaro-no-rhythm': lambda: Seq2SeqModule(
+				description_flavor='description',
+				description_options={'instruments': True, 'chords': True, 'meta': True, 'rhyt':False, 'poly':True},
+				**seq2seq_kwargs
+			),
+			'figaro-no-poly': lambda: Seq2SeqModule(
+				description_flavor='description',
+				description_options={'instruments': True, 'chords': False, 'meta': True, 'rhyt':True, 'poly':False},
 				**seq2seq_kwargs
 			),
 			'baseline': lambda: Seq2SeqModule(
@@ -165,6 +172,7 @@ def main(args):
 			),
 		}[args.model]()
 
+	### Create data loaders ###
 	datamodule = model.get_datamodule(
 		midi_files,
 		vae_module=vae_module,
@@ -199,29 +207,28 @@ def main(args):
 		limit_val_batches=64,
 		auto_scale_batch_size=False,
 		auto_lr_find=False,
-		#accumulate_grad_batches=ACCUMULATE_GRADS,
+		accumulate_grad_batches=ACCUMULATE_GRADS,
 		gradient_clip_val=1.0, 
 		detect_anomaly=True,
-		#resume_from_checkpoint=args.checkpoint,
-		enable_checkpointing=True,
-		enable_progress_bar=True,
-		enable_model_summary=True
+		resume_from_checkpoint=args.checkpoint,
+		#enable_checkpointing=True,
+		#enable_progress_bar=True,
+		#enable_model_summary=True
 	)
 
 	trainer.fit(model, datamodule)
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
-	parser.add_argument('--exp_name', type=str, default='0521_rhythm', help='folder name by date')
+	parser.add_argument('--exp_name', type=str, require=True, help='folder name by date')
 	parser.add_argument('--root_dir', type=str, default='/ssddata2/joann/lmd_full', help='root dir for training data')
 	parser.add_argument('--output_dir', type=str, default='./results', help='output directory for training checkpoints')
-	#parser.add_argument('--log_dir', type=str, default='./logs', help='logging directory for tensorboard')
 	parser.add_argument('--max_n_file', type=int, default=-1, help='max number of midi files to process')
-	parser.add_argument('--model', type=str, default='figaro-expert', help='model name')
+	parser.add_argument('--model', type=str, required=True, help='model name')
 	parser.add_argument('--checkpoint', type=str, default=None, help='path for checkpoint to use')
-	parser.add_argument('--batch', type=int, default=24, help='batch size')  # 128
-	parser.add_argument('--target_batch', type=int, default=96, help='Number of samples in each backward step')
-	parser.add_argument('--epoch', type=int, default=16, help='Max. number of training epochs')
+	parser.add_argument('--batch', type=int, default=1, help='batch size')  # 128
+	parser.add_argument('--target_batch', type=int, default=4, help='Number of samples in each backward step')
+	parser.add_argument('--epoch', type=int, default=64, help='Max. number of training epochs')
 	parser.add_argument('--lr', type=int, default=1e-4, help='Learning rate')
 	args = parser.parse_args()
 	main(args)

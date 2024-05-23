@@ -12,7 +12,8 @@ from constants import (
 	DEFAULT_MEAN_VELOCITY_BINS,
 	DEFAULT_MEAN_PITCH_BINS,
 	DEFAULT_MEAN_DURATION_BINS,
-	DEFAULT_RHYTHM_INTENSITY
+	DEFAULT_RHYTHM_INTENSITY,
+	DEFAULT_POLYPHONY_BINS
 )
 
 
@@ -36,6 +37,7 @@ from constants import (
 	TEMPO_KEY,
 	CHORD_KEY,
 	RHYTHM_INTENSITY_KEY,
+	POLYPHONY_KEY,
 
 	NOTE_DENSITY_KEY,
 	MEAN_PITCH_KEY,
@@ -75,7 +77,8 @@ class Tokens:
 		tempo_key=TEMPO_KEY,
 		bar_key=BAR_KEY,
 		position_key=POSITION_KEY,
-		rhythm_key=RHYTHM_INTENSITY_KEY
+		rhythm_key=RHYTHM_INTENSITY_KEY,
+		polyphony_key=POLYPHONY_KEY
 	):
 		instrument_tokens = Tokens.get_instrument_tokens(instrument_key)
 
@@ -86,6 +89,7 @@ class Tokens:
 		bar_tokens = [f'{bar_key}_{i}' for i in range(MAX_N_BARS)]
 		position_tokens = [f'{position_key}_{i}' for i in range(MAX_BAR_LENGTH*4*DEFAULT_POS_PER_QUARTER)]
 		rhythm_tokens = [f'{rhythm_key}_{i}' for i in range(len(RHYTHM_INTENSITY_KEY))]
+		polyphony_tokens = [f'{polyphony_key}_{i}' for i in range(len(POLYPHONY_KEY))]
 
 		time_sig_tokens = Tokens.get_time_signature_tokens(time_signature_key)
 
@@ -97,6 +101,7 @@ class Tokens:
 			velocity_tokens + 
 			duration_tokens + 
 			rhythm_tokens +
+			polyphony_tokens +
 			bar_tokens + 
 			position_tokens
 		)
@@ -156,6 +161,7 @@ class DescriptionVocab(Vocab):
 		pitch_tokens = [f'{MEAN_PITCH_KEY}_{i}' for i in range(len(DEFAULT_MEAN_PITCH_BINS))]
 		duration_tokens = [f'{MEAN_DURATION_KEY}_{i}' for i in range(len(DEFAULT_MEAN_DURATION_BINS))]
 		rhythm_tokens = [f'{RHYTHM_INTENSITY_KEY}_{i}' for i in range(len(DEFAULT_RHYTHM_INTENSITY))]
+		polyphony_tokens = [f'{POLYPHONY_KEY}_{i}' for i in range(len(DEFAULT_POLYPHONY_BINS))]
 
 		self.tokens = (
 			time_sig_tokens +
@@ -166,6 +172,7 @@ class DescriptionVocab(Vocab):
 			pitch_tokens + 
 			duration_tokens + 
 			rhythm_tokens +
+			polyphony_tokens +
 			bar_tokens
 		)
 

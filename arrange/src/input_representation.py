@@ -21,6 +21,7 @@ from constants import (
 	MEAN_VELOCITY_KEY,
 	MEAN_DURATION_KEY,
 	RHYTHM_INTENSITY_KEY,
+	POLYPHONY_KEY,
 	# discretization parameters
 	DEFAULT_POS_PER_QUARTER,
 	DEFAULT_VELOCITY_BINS,
@@ -31,7 +32,8 @@ from constants import (
 	DEFAULT_MEAN_PITCH_BINS,
 	DEFAULT_MEAN_DURATION_BINS,
 	DEFAULT_RESOLUTION,
-	DEFAULT_RHYTHM_INTENSITY
+	DEFAULT_RHYTHM_INTENSITY,
+	DEFAULT_POLYPHONY_BINS
 )
 
 # define "Item" for general storage
@@ -62,7 +64,7 @@ class Event(object):
 
 class InputRepresentation():
 	def version():
-		return 'v4'
+		return 'v5'
 	
 	def __init__(self, file, do_extract_chords=True, strict=False):
 		if isinstance(file, pretty_midi.PrettyMIDI):
@@ -360,9 +362,10 @@ class InputRepresentation():
 			ticks_per_bar = self.pm.resolution * quarters_per_bar
 			flags = np.linspace(bar_st, bar_st + ticks_per_bar, positions_per_bar, endpoint=False) # tick numbers aligned to positions
 			rhythm_raw = np.zeros(positions_per_bar) # ***
+			poly_raw = np.zeros(positions_per_bar) # ***
 			for item in self.groups[i][1:-1]:
 				# position
-				index = np.argmin(abs(flags-item.start))  # ??? always=0??
+				index = np.argmin(abs(flags-item.start))
 				pos_event = Event(
 								name=POSITION_KEY, 
 								time=item.start,
@@ -409,6 +412,8 @@ class InputRepresentation():
 									value=index,
 									text='{}/{}'.format(duration, DEFAULT_DURATION_BINS[index])
 								))
+					st_pos = np.argmin(abs(flags-item.start))
+					poly_raw[st_pos:st_pos+duration] += 1
 
 				# 2. Chord related
 				elif item.name == 'Chord':
@@ -440,11 +445,18 @@ class InputRepresentation():
 			rhythm_index = np.argmin(abs(DEFAULT_RHYTHM_INTENSITY-intensity))
 			events.append(Event(
 							name=RHYTHM_INTENSITY_KEY,
-							time=None,  # ??
+							time=None,
 							value=rhythm_index,
 							text='{}/{}'.format(intensity, DEFAULT_RHYTHM_INTENSITY[rhythm_index])
 						))
-			
+			poly = np.round(np.mean(poly_raw), 2)
+			poly_index = np.argmin(abs(DEFAULT_POLYPHONY_BINS-poly))
+			events.append(Event(
+							name=POLYPHONY_KEY,
+							time=None,
+							value=poly_index,
+							text='{}/{}'.format(poly, DEFAULT_POLYPHONY_BINS[poly_index])
+			))
 		
 		return [f'{e.name}_{e.value}' for e in events]
 
@@ -496,8 +508,9 @@ class InputRepresentation():
 								text='{:.2f}/{:.2f}'.format(note_density, DEFAULT_NOTE_DENSITY_BINS[index])
 							))
 
-				# rhythm intensity (Rhythm Intensity) ***
+				# rhythm intensity (Rhythm Intensity) + Polyphony ***
 				rhythm_raw = np.zeros(positions_per_bar)
+				poly_raw = np.zeros(positions_per_bar)
 				quarters_per_bar = 4 * time_sig.numerator / time_sig.denominator
 				ticks_per_bar = self.pm.resolution * quarters_per_bar
 				flags = np.linspace(bar_st, bar_st + ticks_per_bar, positions_per_bar, endpoint=False) # tick numbers aligned to positions
@@ -505,6 +518,9 @@ class InputRepresentation():
 					index = np.argmin(abs(flags-item.start))
 					if item.name == 'Note':
 						rhythm_raw[index] = 1 # ***
+						duration = self.tick_to_position(item.end - item.start)
+						st_pos = np.argmin(abs(flags-item.start))
+						poly_raw[st_pos:st_pos+duration] += 1
 				intensity = np.round(np.mean(rhythm_raw), 3)
 				rhythm_index = np.argmin(abs(DEFAULT_RHYTHM_INTENSITY-intensity))
 				events.append(Event(
@@ -512,7 +528,15 @@ class InputRepresentation():
 								time=None,
 								value=rhythm_index,
 								text='{}/{}'.format(intensity, DEFAULT_RHYTHM_INTENSITY[rhythm_index])
-							))
+							))	
+				poly = np.round(np.mean(poly_raw), 2)
+				poly_index = np.argmin(abs(DEFAULT_POLYPHONY_BINS-poly))
+				events.append(Event(
+								name=POLYPHONY_KEY,
+								time=None,
+								value=poly_index,
+								text='{}/{}'.format(poly, DEFAULT_POLYPHONY_BINS[poly_index])
+				))			
 			
 				# velocity (Mean Velocity), bar level
 				# will be 0 if there's no notes

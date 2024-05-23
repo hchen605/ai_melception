@@ -464,7 +464,10 @@ class InputRepresentation():
 						omit_time_sig=False,
 						omit_instruments=False,
 						omit_chords=False,
-						omit_meta=False):
+						omit_meta=False,
+						omit_rhyt=False,
+						omit_poly=False):
+		print('Get Desc: {}, {}, {}, {}, {}, {}'.format(omit_time_sig,omit_instruments,omit_chords,omit_meta,omit_rhyt,omit_poly))
 		events = []
 		n_downbeat = 0
 		current_chord = None
@@ -509,34 +512,37 @@ class InputRepresentation():
 							))
 
 				# rhythm intensity (Rhythm Intensity) + Polyphony ***
-				rhythm_raw = np.zeros(positions_per_bar)
-				poly_raw = np.zeros(positions_per_bar)
-				quarters_per_bar = 4 * time_sig.numerator / time_sig.denominator
-				ticks_per_bar = self.pm.resolution * quarters_per_bar
-				flags = np.linspace(bar_st, bar_st + ticks_per_bar, positions_per_bar, endpoint=False) # tick numbers aligned to positions
-				for item in self.groups[i][1:-1]:
-					index = np.argmin(abs(flags-item.start))
-					if item.name == 'Note':
-						rhythm_raw[index] = 1 # ***
-						duration = self.tick_to_position(item.end - item.start)
-						st_pos = np.argmin(abs(flags-item.start))
-						poly_raw[st_pos:st_pos+duration] += 1
-				intensity = np.round(np.mean(rhythm_raw), 3)
-				rhythm_index = np.argmin(abs(DEFAULT_RHYTHM_INTENSITY-intensity))
-				events.append(Event(
-								name=RHYTHM_INTENSITY_KEY,
-								time=None,
-								value=rhythm_index,
-								text='{}/{}'.format(intensity, DEFAULT_RHYTHM_INTENSITY[rhythm_index])
-							))	
-				poly = np.round(np.mean(poly_raw), 2)
-				poly_index = np.argmin(abs(DEFAULT_POLYPHONY_BINS-poly))
-				events.append(Event(
-								name=POLYPHONY_KEY,
-								time=None,
-								value=poly_index,
-								text='{}/{}'.format(poly, DEFAULT_POLYPHONY_BINS[poly_index])
-				))			
+				if not omit_rhyt or not omit_poly:
+					rhythm_raw = np.zeros(positions_per_bar)
+					poly_raw = np.zeros(positions_per_bar)
+					quarters_per_bar = 4 * time_sig.numerator / time_sig.denominator
+					ticks_per_bar = self.pm.resolution * quarters_per_bar
+					flags = np.linspace(bar_st, bar_st + ticks_per_bar, positions_per_bar, endpoint=False) # tick numbers aligned to positions
+					for item in self.groups[i][1:-1]:
+						index = np.argmin(abs(flags-item.start))
+						if item.name == 'Note':
+							rhythm_raw[index] = 1 # ***
+							duration = self.tick_to_position(item.end - item.start)
+							st_pos = np.argmin(abs(flags-item.start))
+							poly_raw[st_pos:st_pos+duration] += 1
+					if not omit_rhyt:
+						intensity = np.round(np.mean(rhythm_raw), 3)
+						rhythm_index = np.argmin(abs(DEFAULT_RHYTHM_INTENSITY-intensity))
+						events.append(Event(
+										name=RHYTHM_INTENSITY_KEY,
+										time=None,
+										value=rhythm_index,
+										text='{}/{}'.format(intensity, DEFAULT_RHYTHM_INTENSITY[rhythm_index])
+									))	
+					if not omit_poly:
+						poly = np.round(np.mean(poly_raw), 2)
+						poly_index = np.argmin(abs(DEFAULT_POLYPHONY_BINS-poly))
+						events.append(Event(
+										name=POLYPHONY_KEY,
+										time=None,
+										value=poly_index,
+										text='{}/{}'.format(poly, DEFAULT_POLYPHONY_BINS[poly_index])
+						))			
 			
 				# velocity (Mean Velocity), bar level
 				# will be 0 if there's no notes

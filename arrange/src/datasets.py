@@ -235,11 +235,13 @@ class MidiDataset(IterableDataset):
     self.bar_token_mask = bar_token_mask
     self.bar_token_idx = bar_token_idx
 
+    ### Comment this section if don't want to load from cache
     if CACHE_PATH:
       self.cache_path = os.path.join(CACHE_PATH, InputRepresentation.version())
       os.makedirs(self.cache_path, exist_ok=True)
       print(f"Using cache path: {self.cache_path}")
     else:
+    ###
       self.cache_path = None
 
     if self.description_flavor in ['latent', 'both'] and LATENT_CACHE_PATH:
@@ -460,6 +462,7 @@ class MidiDataset(IterableDataset):
 
   def load_file(self, file):
     name = os.path.basename(file)
+    ### Comment out if not using cache
     if self.cache_path and self.use_cache:
       cache_file = os.path.join(self.cache_path, name)
 
@@ -471,7 +474,7 @@ class MidiDataset(IterableDataset):
       try:
         rep = InputRepresentation(file, strict=True)
         events = rep.get_remi_events()
-        description = rep.get_description()
+        description = rep.get_description(**self.description_options)  # {'instruments': True, 'chords': False, 'meta': True, 'rhyt':True, 'poly':False}
       except Exception as err:
         raise ValueError(f'Unable to load file {file}') from err
 
@@ -480,6 +483,7 @@ class MidiDataset(IterableDataset):
       'description': description
     }
 
+    # Comment out if not using cache
     if self.use_cache:
       # Try to store the computed representation in the cache directory
       try:
@@ -493,8 +497,8 @@ class MidiDataset(IterableDataset):
       sample['codes'] = codes
 
     if self.description_options is not None and len(self.description_options) > 0:
-      opts = self.description_options
-      kwargs = { key: opts[key] for key in ['instruments', 'chords', 'meta', 'poly', 'rhyt'] if key in opts }
+      #opts = self.description_options
+      #kwargs = { key: opts[key] for key in ['instruments', 'chords', 'meta', 'poly', 'rhyt'] if key in opts }
       sample['description'] = self.preprocess_description(sample['description'], **self.description_options)
     print(sample['description'])
     #print('sample: ', sample) #'Position_3', 'Instrument_drum', 'Pitch_drum_42', 'Velocity_26' ...
@@ -588,6 +592,7 @@ class MidiDataset_Desc(IterableDataset):
     self.bar_token_mask = bar_token_mask
     self.bar_token_idx = bar_token_idx
 
+    ### Comment out if not using cache
     if CACHE_PATH:
       self.cache_path = os.path.join(CACHE_PATH, InputRepresentation.version())
       os.makedirs(self.cache_path, exist_ok=True)
@@ -812,7 +817,7 @@ class MidiDataset_Desc(IterableDataset):
     name = os.path.basename(file)
     rep = InputRepresentation(file, strict=True)
     events = rep.get_remi_events()
-    description = rep.get_description()  # includes Rhythm Intensity
+    description = rep.get_description(**self.description_options)  # includes Rhythm Intensity {'instruments': True, 'chords': False, 'meta': True, 'rhyt':True, 'poly':False}
      
     file_path = self.control # CONTROL
     description = []

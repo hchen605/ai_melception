@@ -1,0 +1,12 @@
+Bar_1,Note Density_0,Rhythm Intensity_0,Mean Velocity_32,Mean Pitch_16,Mean Duration_32,Instrument_Bright Acoustic Piano,Chord_E:min,Chord_E:min7,
+Bar_2,Note Density_0,Rhythm Intensity_0,Mean Velocity_32,Mean Pitch_16,Mean Duration_32,Instrument_Bright Acoustic Piano,Chord_E:min7,Chord_D:min,
+Bar_3,Note Density_1,Rhythm Intensity_0,Mean Velocity_32,Mean Pitch_16,Mean Duration_32,Instrument_Bright Acoustic Piano,Chord_D:min,Chord_C:dom7,
+Bar_4,Note Density_0,Rhythm Intensity_0,Mean Velocity_32,Mean Pitch_15,Mean Duration_32,Instrument_Bright Acoustic Piano,Chord_C:dom7,Chord_A:min7,
+Bar_5,Note Density_1,Rhythm Intensity_0,Mean Velocity_32,Mean Pitch_16,Mean Duration_32,Instrument_Bright Acoustic Piano,Chord_A:min7,
+Bar_6,Note Density_0,Rhythm Intensity_0,Mean Velocity_32,Mean Pitch_15,Mean Duration_32,Instrument_Bright Acoustic Piano,Chord_A:min7,Chord_D:min7,
+Bar_7,Note Density_1,Rhythm Intensity_0,Mean Velocity_32,Mean Pitch_16,Mean Duration_32,Instrument_Bright Acoustic Piano,Chord_D:min7,Chord_F:maj,
+Bar_8,Note Density_0,Rhythm Intensity_0,Mean Velocity_32,Mean Pitch_16,Mean Duration_32,Instrument_Bright Acoustic Piano,Chord_F:maj,Chord_B:min,
+Bar_9,Note Density_1,Rhythm Intensity_0,Mean Velocity_32,Mean Pitch_16,Mean Duration_32,Instrument_Bright Acoustic Piano,Chord_A:min7,Chord_C:maj,
+Bar_10,Note Density_1,Rhythm Intensity_0,Mean Velocity_32,Mean Pitch_15,Mean Duration_32,Instrument_Bright Acoustic Piano,Chord_B:min,Chord_F:maj,
+Bar_11,Note Density_1,Rhythm Intensity_0,Mean Velocity_32,Mean Pitch_16,Mean Duration_32,Instrument_Bright Acoustic Piano,Chord_F:maj7,Chord_C:maj,Chord_E:min,
+Bar_12,Note Density_1,Rhythm Intensity_0,Mean Velocity_32,Mean Pitch_16,Mean Duration_32,Instrument_Bright Acoustic Piano,Chord_G:maj,Chord_F:maj,Chord_N:N

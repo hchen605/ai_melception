@@ -74,7 +74,7 @@ def main(args):
 	else:
 		vae_module = None
 
-	model = Seq2SeqModule.load_from_checkpoint(CHECKPOINT)
+	model = Seq2SeqModule.load_from_checkpoint(CHECKPOINT, map_location=lambda storage, loc: storage)
 	model.freeze()
 	model.eval()
 
@@ -124,14 +124,14 @@ def main(args):
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
-	parser.add_argument('--exp_name', type=str, default='0521_rhythm', help='folder name by date')
+	parser.add_argument('--exp_name', type=str, default='0523_rhythm', help='folder name by date')
 	parser.add_argument('--model', type=str, default='figaro-expert', help='model name')
 	#parser.add_argument('--output_dir', type=str, default='./arrange/samples', help='output directory for generated samples')
 	parser.add_argument('--desc_dir', type=str, default='./arrange/desc', help='output directory for descriptions')
 	parser.add_argument('--midi_file', type=str, default='./arrange/data/Honestly_Piano_12.midi', help='file path for midi')
 	parser.add_argument('--max_n_file', type=int, default=-1, help='max number of midi files to process')
 	parser.add_argument('--max_bars', type=int, default=32, help='max number of bars')
-	parser.add_argument('--checkpoint', type=str, default='arrange/checkpoints/figaro-expert.ckpt', help='path for checkpoint to use')
+	parser.add_argument('--checkpoint', type=str, default='arrange/results/0523_rhythm/step=41000-valid_loss=1.13.ckpt', help='path for checkpoint to use')
 	parser.add_argument('--batch', type=int, default=1, help='batch size')
 	args = parser.parse_args()
 	main(args)

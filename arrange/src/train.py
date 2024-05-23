@@ -12,6 +12,7 @@ import pdb
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
+#os.environ['CUDA_LAUNCH_BLOCKING']=1
 N_CODES = 2048  # [VQ-VAE] Codebook size
 N_GROUPS = 16  # [VQ-VAE] Number of groups to split the latent vector into before discretization
 D_MODEL = 512  # Hidden size of the model
@@ -194,7 +195,7 @@ def main(args):
 
 	trainer = pl.Trainer(
 		devices=1,
-		accelerator='gpu',
+		accelerator='cpu',  # gpu
 		strategy='dp',
 		profiler='simple',
 		callbacks=[checkpoint_callback, lr_monitor, 
@@ -220,14 +221,14 @@ def main(args):
 
 if __name__ == '__main__':
 	parser = argparse.ArgumentParser()
-	parser.add_argument('--exp_name', type=str, require=True, help='folder name by date')
+	parser.add_argument('--exp_name', type=str, required=True, help='folder name by date')
 	parser.add_argument('--root_dir', type=str, default='/ssddata2/joann/lmd_full', help='root dir for training data')
 	parser.add_argument('--output_dir', type=str, default='./results', help='output directory for training checkpoints')
 	parser.add_argument('--max_n_file', type=int, default=-1, help='max number of midi files to process')
 	parser.add_argument('--model', type=str, required=True, help='model name')
 	parser.add_argument('--checkpoint', type=str, default=None, help='path for checkpoint to use')
-	parser.add_argument('--batch', type=int, default=1, help='batch size')  # 128
-	parser.add_argument('--target_batch', type=int, default=4, help='Number of samples in each backward step')
+	parser.add_argument('--batch', type=int, default=2, help='batch size')  # 128
+	parser.add_argument('--target_batch', type=int, default=8, help='Number of samples in each backward step')
 	parser.add_argument('--epoch', type=int, default=64, help='Max. number of training epochs')
 	parser.add_argument('--lr', type=int, default=1e-4, help='Learning rate')
 	args = parser.parse_args()

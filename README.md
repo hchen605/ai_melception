@@ -18,6 +18,11 @@ Some demos may be seen at https://www.melception.com/
   ```     
   The weights for re-instrumentation are included in the repo.   
 
+* To train the model from scratch:
+  ```
+  python ./src/train.py --exp_name <date_attr> --model figaro-no-poly
+  ```
+
 ### 0. Gen init output after upload:   
 ```
 cd init   
@@ -26,14 +31,14 @@ python gen_sample_preload.py
 
 ### 1. Gen control description:   
 ```
-CUDA_VISIBLE_DEVICES=$ FILE=arrange/data/Honestly_Piano_12.midi MODEL=figaro-expert CHECKPOINT=arrange/checkpoints/figaro-expert.ckpt python arrange/src/sample_desc.py
+python arrange/src/sample_desc.py
 ```   
 Input midi can be set by `FILE`. Description text file $Output.txt will be generated in `arrange/desc` folder.    
 User can edit the description text for fine-grained control over music generation.
    
 ### 2. Gen sample based on user control description:   
 ```
-CUDA_VISIBLE_DEVICES=$ CONTROL=arrange/desc/description_honest.txt MODEL=figaro-expert CHECKPOINT=arrange/checkpoints/figaro-expert.ckpt python arrange/src/generate_sample.py
+python arrange/src/generate_sample.py
 ```    
 `CONTROL` is the user attribute description text file.    
 Find midi output at `sample` folder

@@ -12,7 +12,6 @@ import pdb
 
 device = torch.device('cuda' if torch.cuda.is_available() else 'cpu')
 
-#os.environ['CUDA_LAUNCH_BLOCKING']=1
 N_CODES = 2048  # [VQ-VAE] Codebook size
 N_GROUPS = 16  # [VQ-VAE] Number of groups to split the latent vector into before discretization
 D_MODEL = 512  # Hidden size of the model
@@ -22,7 +21,7 @@ VAE_CHECKPOINT = None
 
 WARMUP_STEPS = 4000
 MAX_STEPS = 1e20
-MAX_TRAINING_STEPS = 100000  # DON'T CHANGE! Max. number of training iterations.
+MAX_TRAINING_STEPS = 100000  # 100000 DON'T CHANGE! Max. number of training iterations.
 LR_SCHEDULE = os.getenv('LR_SCHEDULE', 'const')  # Current: sqrt
 CONTEXT_SIZE = 256
 
@@ -48,6 +47,8 @@ def main(args):
 		'figaro-no-inst',
 		'figaro-no-chord',
 		'figaro-no-meta',
+		'figaro-no-rhythm',
+		'figaro-no-poly',
 		'baseline',
 	]
 
@@ -190,14 +191,13 @@ def main(args):
 		save_top_k=2,
 		every_n_train_steps= 1000
 	)
-
 	lr_monitor = pl.callbacks.LearningRateMonitor(logging_interval='step')
 
 	trainer = pl.Trainer(
 		devices=1,
-		accelerator='cpu',  # gpu
+		accelerator='gpu',  # gpu
 		strategy='dp',
-		profiler='simple',
+		#profiler='simple',  # profiler’s results will be printed at the completion of a training
 		callbacks=[checkpoint_callback, lr_monitor, 
 					pl.callbacks.stochastic_weight_avg.StochasticWeightAveraging(swa_lrs=1e-2),
 					],
@@ -213,10 +213,9 @@ def main(args):
 		detect_anomaly=True,
 		resume_from_checkpoint=args.checkpoint,
 		#enable_checkpointing=True,
-		#enable_progress_bar=True,
+		enable_progress_bar=True,
 		#enable_model_summary=True
 	)
-
 	trainer.fit(model, datamodule)
 
 if __name__ == '__main__':
@@ -227,8 +226,8 @@ if __name__ == '__main__':
 	parser.add_argument('--max_n_file', type=int, default=-1, help='max number of midi files to process')
 	parser.add_argument('--model', type=str, required=True, help='model name')
 	parser.add_argument('--checkpoint', type=str, default=None, help='path for checkpoint to use')
-	parser.add_argument('--batch', type=int, default=2, help='batch size')  # 128
-	parser.add_argument('--target_batch', type=int, default=8, help='Number of samples in each backward step')
+	parser.add_argument('--batch', type=int, default=24, help='batch size')  # 128
+	parser.add_argument('--target_batch', type=int, default=96, help='Number of samples in each backward step')
 	parser.add_argument('--epoch', type=int, default=64, help='Max. number of training epochs')
 	parser.add_argument('--lr', type=int, default=1e-4, help='Learning rate')
 	args = parser.parse_args()

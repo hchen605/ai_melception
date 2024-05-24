@@ -250,6 +250,7 @@ class Seq2SeqModule(pl.LightningModule):
       return loss
   
   def training_step(self, batch, batch_idx):
+    print('train')
     loss = self.get_loss(batch)
     self.log('train_loss', loss.detach(), on_step=True, on_epoch=True, prog_bar=False, logger=True, sync_dist=True)
     return loss

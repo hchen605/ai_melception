@@ -23,12 +23,11 @@ LATENT_CACHE_PATH = os.getenv('LATENT_CACHE_PATH', os.path.join(os.getenv('SCRAT
 class MidiDataModule(pl.LightningDataModule):
   def __init__(self, 
         files,
-        max_len,  # context_size
+        max_len,
         batch_size=32, 
         num_workers=4,
         pin_memory=True, 
         description_flavor='none',
-        #description_options=None, # inst, chord, meta, rhyt, poly
         train_val_test_split=(0.95, 0.1, 0.05), 
         vae_module=None,
         **kwargs):
@@ -41,7 +40,6 @@ class MidiDataModule(pl.LightningDataModule):
     self.vae_module = vae_module
     self.max_len = max_len
     self.description_flavor = description_flavor
-    #self.description_options = description_options
 
     if self.description_flavor in ['latent', 'both']:
       assert self.vae_module is not None, "Description flavor 'latent' requires 'vae_module' to be present, but found 'None'"
@@ -51,37 +49,35 @@ class MidiDataModule(pl.LightningDataModule):
     self.kwargs = kwargs
 
   def setup(self, stage=None):
-    '''
-      Only modify dataset size based on this original structure! 
-      And make validation step is running.
-      len(self.files) = 124302, n_train=118086, n_valid=12430, n_test=6215
-      train_val_split = 0.85:0.1:0.05
-    '''
-    # n_train = int(self.train_val_test_split[0] * len(self.files))
-    n_valid = int(self.train_val_test_split[1] * len(self.files)*0.08)
-    n_test = int(self.train_val_test_split[2] * len(self.files)*0.08)
-    train_files = self.files[n_test+n_valid:n_test+n_valid+8000]  # 1491~9491=8000
+    ## self.files length = 124302
+    # n_train = int(self.train_val_test_split[0] * len(self.files))  # 118086
+    n_valid = int(self.train_val_test_split[1] * len(self.files)*0.08)  # 994
+    n_test = int(self.train_val_test_split[2] * len(self.files)*0.08)  # 497
+    train_files = self.files[n_test+n_valid:n_test+n_valid+8000]  # 1491~9491
     valid_files = self.files[n_test:n_test+n_valid]  # 497~1491=994
     test_files = self.files[:n_test] #497
     #print('train:valid:test {}:{}:{}'.format(len(train_files), len(valid_files), len(test_files)))
 
     # 136731 = 118086+12430+6215 (0.86/0.09/0.045)
+    #n_train = 15000 
+    #n_valid = 3000  
+    #n_test = 3000
+    #train_files = self.files[:n_train]
+    #valid_files = self.files[n_train:n_valid]
+    #test_files = self.files[n_valid:n_test]
 
     self.train_ds = MidiDataset(train_files, self.max_len, 
     description_flavor=self.description_flavor,
-    #description_options=self.description_options,
     vae_module=self.vae_module,
     **self.kwargs
     )
     self.valid_ds = MidiDataset(valid_files, self.max_len, 
     description_flavor=self.description_flavor,
-    #description_options=self.description_options,
     vae_module=self.vae_module,
     **self.kwargs
     )
     self.test_ds = MidiDataset(test_files, self.max_len, 
     description_flavor=self.description_flavor,
-    #description_options=self.description_options,
     vae_module=self.vae_module,
     **self.kwargs
     )
@@ -235,13 +231,11 @@ class MidiDataset(IterableDataset):
     self.bar_token_mask = bar_token_mask
     self.bar_token_idx = bar_token_idx
 
-    ### Comment this section if don't want to load from cache
     if CACHE_PATH:
       self.cache_path = os.path.join(CACHE_PATH, InputRepresentation.version())
       os.makedirs(self.cache_path, exist_ok=True)
       print(f"Using cache path: {self.cache_path}")
     else:
-    ###
       self.cache_path = None
 
     if self.description_flavor in ['latent', 'both'] and LATENT_CACHE_PATH:
@@ -462,7 +456,6 @@ class MidiDataset(IterableDataset):
 
   def load_file(self, file):
     name = os.path.basename(file)
-    ### Comment out if not using cache
     if self.cache_path and self.use_cache:
       cache_file = os.path.join(self.cache_path, name)
 
@@ -474,22 +467,21 @@ class MidiDataset(IterableDataset):
       try:
         rep = InputRepresentation(file, strict=True)
         events = rep.get_remi_events()
-        description = rep.get_description(**self.description_options)  # {'instruments': True, 'chords': False, 'meta': True, 'rhyt':True, 'poly':False}
+        description = rep.get_description()
       except Exception as err:
         raise ValueError(f'Unable to load file {file}') from err
 
-    sample = {
-      'events': events,
-      'description': description
-    }
+      sample = {
+        'events': events,
+        'description': description
+      }
 
-    # Comment out if not using cache
-    if self.use_cache:
-      # Try to store the computed representation in the cache directory
-      try:
-        pickle.dump(sample, open(cache_file, 'wb'))
-      except Exception as err:
-        print('Unable to cache file:', str(err))
+      if self.use_cache:
+        # Try to store the computed representation in the cache directory
+        try:
+          pickle.dump(sample, open(cache_file, 'wb'))
+        except Exception as err:
+          print('Unable to cache file:', str(err))
 
     if self.description_flavor in ['latent', 'both']:
       latents, codes = self.get_latent_representation(sample['events'], name)
@@ -498,13 +490,11 @@ class MidiDataset(IterableDataset):
 
     if self.description_options is not None and len(self.description_options) > 0:
       #opts = self.description_options
-      #kwargs = { key: opts[key] for key in ['instruments', 'chords', 'meta', 'poly', 'rhyt'] if key in opts }
+      #kwargs = { key: opts[key] for key in ['instruments', 'chords', 'meta'] if key in opts }
       sample['description'] = self.preprocess_description(sample['description'], **self.description_options)
-    print(sample['description'])
     #print('sample: ', sample) #'Position_3', 'Instrument_drum', 'Pitch_drum_42', 'Velocity_26' ...
     #print('sample description: ', sample['description']) #'Note Density_1', 'Mean Velocity_12', 'Mean Pitch_13', 'Mean Duration_32',...
     #print('sample event: ', sample['events'])
-
     return sample
 
   def get_latent_representation(self, events, cache_key=None, bar_token_mask='<mask>'):
@@ -592,7 +582,6 @@ class MidiDataset_Desc(IterableDataset):
     self.bar_token_mask = bar_token_mask
     self.bar_token_idx = bar_token_idx
 
-    ### Comment out if not using cache
     if CACHE_PATH:
       self.cache_path = os.path.join(CACHE_PATH, InputRepresentation.version())
       os.makedirs(self.cache_path, exist_ok=True)
@@ -817,8 +806,11 @@ class MidiDataset_Desc(IterableDataset):
     name = os.path.basename(file)
     rep = InputRepresentation(file, strict=True)
     events = rep.get_remi_events()
-    description = rep.get_description(**self.description_options)  # includes Rhythm Intensity {'instruments': True, 'chords': False, 'meta': True, 'rhyt':True, 'poly':False}
+    description = rep.get_description()  # includes Rhythm Intensity
      
+    #print('------ gen test 3 --------\n')
+    #print(events)
+    #file_path = 'arrange/desc/description_honest.txt'
     file_path = self.control # CONTROL
     description = []
     with open(file_path, 'r') as file:
@@ -852,10 +844,10 @@ class MidiDataset_Desc(IterableDataset):
       sample['codes'] = codes
 
     if self.description_options is not None and len(self.description_options) > 0:
-      opts = self.description_options
-      kwargs = { key: opts[key] for key in ['instruments', 'chords', 'meta', 'rhyt', 'poly'] if key in opts }
+      #opts = self.description_options
+      #kwargs = { key: opts[key] for key in ['instruments', 'chords', 'meta'] if key in opts }
       sample['description'] = self.preprocess_description(sample['description'], **self.description_options)
-    print('description: ', sample['description'])
+    
     #print('sample: ', sample) #'Position_3', 'Instrument_drum', 'Pitch_drum_42', 'Velocity_26' ...
     #print('sample description: ', sample['description']) #'Note Density_1', 'Mean Velocity_12', 'Mean Pitch_13', 'Mean Duration_32',...
     return sample  # includes Rhythm Intensity

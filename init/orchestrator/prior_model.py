@@ -368,7 +368,7 @@ class Prior(nn.Module):
         vqQaA.load_state_dict(torch.load(QA_model_path, map_location=torch.device('cpu')))
         vqQaA.eval()
         model = cls(inference=True, QA_model=vqQaA, DEVICE=DEVICE).to(DEVICE)
-        model.load_state_dict(torch.load(prior_model_path), strict=False)
+        model.load_state_dict(torch.load(prior_model_path, map_location=DEVICE), strict=False)
         return model
     
 

@@ -16,7 +16,7 @@ SONG_BOOK = {'Castles in the Air': ['A8A8B8B8', 1, 100],  #1 beat in the pick-up
 
 def main(args):
     DATA_FILE_ROOT = args.data_root
-    DEMO_ROOT = './demo'
+    DEMO_ROOT = '../../proto-demo/frontend/public/from_back'
     DEVICE = args.device if torch.cuda.is_available() else 'cpu'
 
     # load data, init model

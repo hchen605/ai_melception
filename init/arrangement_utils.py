@@ -1,8 +1,10 @@
 import os
+import io
 import numpy as np 
 import torch
 from tqdm import tqdm
 import pickle
+import pdb
 
 # AccoMontage
 from piano_arranger.acc_utils import split_phrases
@@ -18,6 +20,12 @@ from orchestrator.utils import grid2pr, pr2grid, matrix2midi, midi2matrix
 from orchestrator.prior_dataset import TOTAL_LEN_BIN, ABS_POS_BIN, REL_POS_BIN
 
 SLAKH_CLASS_MAPPING = {v: k for k, v in EMBED_PROGRAM_MAPPING.items()}
+
+class CPU_Unpickler(pickle.Unpickler):
+    def find_class(self, module, name):
+        if module == 'torch.storage' and name == '_load_from_bytes':
+            return lambda b: torch.load(io.BytesIO(b), map_location='cpu')
+        else: return super().find_class(module, name)
 
 ## Function called in gen_sample_preload
 def load_premise_preload(DATA_FILE_ROOT, DEVICE):
@@ -47,7 +55,8 @@ def load_premise_preload(DATA_FILE_ROOT, DEVICE):
     print('--- Creating REF ---') #can save and load to save time
     def load_lists(file_path):
         with open(file_path, 'rb') as f:
-            loaded_lists = pickle.load(f)
+            #loaded_lists = pickle.load(f)
+            loaded_lists = CPU_Unpickler(f).load()
         return loaded_lists
 
     file_path = 'REF.pkl'
@@ -60,8 +69,11 @@ def load_premise_preload(DATA_FILE_ROOT, DEVICE):
     orchestrator = Prior.init_inference_model(prior_model_path, QA_model_path, DEVICE=DEVICE)
     orchestrator.to(DEVICE)
     orchestrator.eval()
-    piano_arranger = DisentangleVAE.init_model(torch.device(DEVICE)).cuda()
-    piano_arranger.load_state_dict(torch.load(os.path.join(DATA_FILE_ROOT, 'params_reharmonizer.pt')))
+    if DEVICE == 'cpu':
+        piano_arranger = DisentangleVAE.init_model(torch.device(DEVICE))#.cuda()
+    else:
+        piano_arranger = DisentangleVAE.init_model(torch.device(DEVICE)).cuda()
+    piano_arranger.load_state_dict(torch.load(os.path.join(DATA_FILE_ROOT, 'params_reharmonizer.pt'), map_location=DEVICE))
     print('Finished.')
     return piano_arranger, orchestrator, (acc_pool, edge_weights, texture_filter), (REF, REF_PROG, REF_MIX)
 

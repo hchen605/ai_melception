@@ -13,7 +13,7 @@ from constants import (
           PAD_TOKEN, BOS_TOKEN, EOS_TOKEN, BAR_KEY, POSITION_KEY,
           TIME_SIGNATURE_KEY, INSTRUMENT_KEY, CHORD_KEY,
           NOTE_DENSITY_KEY, MEAN_PITCH_KEY, MEAN_VELOCITY_KEY, MEAN_DURATION_KEY,
-          RHYTHM_INTENSITY_KEY, POLYPHONY_KEY
+          #RHYTHM_INTENSITY_KEY, POLYPHONY_KEY
           )
 
 CONTROL = os.getenv('CONTROL','./arrange/desc/description_honest.txt')
@@ -439,7 +439,8 @@ class MidiDataset(IterableDataset):
     eos_event = torch.tensor(self.vocab.encode([EOS_TOKEN]), dtype=torch.long)
     return bos_event, eos_event
 
-  def preprocess_description(self, desc, instruments=True, chords=True, meta=True, rhyt=True, poly=True):
+  #def preprocess_description(self, desc, instruments=True, chords=True, meta=True, rhyt=True, poly=True):
+  def preprocess_description(self, desc, instruments=True, chords=True, meta=True):
     valid_keys = {
           BAR_KEY: True,
           INSTRUMENT_KEY: instruments,
@@ -449,8 +450,8 @@ class MidiDataset(IterableDataset):
           MEAN_PITCH_KEY: meta,
           MEAN_VELOCITY_KEY: meta,
           MEAN_DURATION_KEY: meta,
-          RHYTHM_INTENSITY_KEY: rhyt,
-          POLYPHONY_KEY: poly
+          #RHYTHM_INTENSITY_KEY: rhyt,
+          #POLYPHONY_KEY: poly
     }
     return [token for token in desc if len(token.split('_')) == 0 or valid_keys[token.split('_')[0]]]
 
@@ -787,7 +788,8 @@ class MidiDataset_Desc(IterableDataset):
     eos_event = torch.tensor(self.vocab.encode([EOS_TOKEN]), dtype=torch.long)
     return bos_event, eos_event
 
-  def preprocess_description(self, desc, instruments=True, chords=True, meta=True, rhyt=True, poly=True):
+  #def preprocess_description(self, desc, instruments=True, chords=True, meta=True, rhyt=True, poly=True):
+  def preprocess_description(self, desc, instruments=True, chords=True, meta=True):
     valid_keys = {
           BAR_KEY: True,
           INSTRUMENT_KEY: instruments,
@@ -797,8 +799,8 @@ class MidiDataset_Desc(IterableDataset):
           MEAN_PITCH_KEY: meta,
           MEAN_VELOCITY_KEY: meta,
           MEAN_DURATION_KEY: meta,
-          RHYTHM_INTENSITY_KEY: rhyt,
-          POLYPHONY_KEY: poly
+          #RHYTHM_INTENSITY_KEY: rhyt,
+          #POLYPHONY_KEY: poly
     }
     return [token for token in desc if len(token.split('_')) == 0 or valid_keys[token.split('_')[0]]]
 

@@ -20,8 +20,8 @@ from constants import (
 	MEAN_PITCH_KEY,
 	MEAN_VELOCITY_KEY,
 	MEAN_DURATION_KEY,
-	RHYTHM_INTENSITY_KEY,
-	POLYPHONY_KEY,
+	#RHYTHM_INTENSITY_KEY,
+	#POLYPHONY_KEY,
 	# discretization parameters
 	DEFAULT_POS_PER_QUARTER,
 	DEFAULT_VELOCITY_BINS,
@@ -32,8 +32,8 @@ from constants import (
 	DEFAULT_MEAN_PITCH_BINS,
 	DEFAULT_MEAN_DURATION_BINS,
 	DEFAULT_RESOLUTION,
-	DEFAULT_RHYTHM_INTENSITY,
-	DEFAULT_POLYPHONY_BINS
+	#DEFAULT_RHYTHM_INTENSITY,
+	#DEFAULT_POLYPHONY_BINS
 )
 
 # define "Item" for general storage
@@ -441,22 +441,22 @@ class InputRepresentation():
 									))
 						current_tempo = item
 			# ***
-			intensity = np.round(np.mean(rhythm_raw), 3)
-			rhythm_index = np.argmin(abs(DEFAULT_RHYTHM_INTENSITY-intensity))
-			events.append(Event(
-							name=RHYTHM_INTENSITY_KEY,
-							time=None,  # ??
-							value=rhythm_index,
-							text='{}/{}'.format(intensity, DEFAULT_RHYTHM_INTENSITY[rhythm_index])
-						))
-			poly = np.round(np.mean(poly_raw), 2)
-			poly_index = np.argmin(abs(DEFAULT_POLYPHONY_BINS-poly))
-			events.append(Event(
-							name=POLYPHONY_KEY,
-							time=None,
-							value=poly_index,
-							text='{}/{}'.format(poly, DEFAULT_POLYPHONY_BINS[poly_index])
-			))
+			#intensity = np.round(np.mean(rhythm_raw), 3)
+			#rhythm_index = np.argmin(abs(DEFAULT_RHYTHM_INTENSITY-intensity))
+			#events.append(Event(
+			#				name=RHYTHM_INTENSITY_KEY,
+			#				time=None,  # ??
+			#				value=rhythm_index,
+			#				text='{}/{}'.format(intensity, DEFAULT_RHYTHM_INTENSITY[rhythm_index])
+			#			))
+			#poly = np.round(np.mean(poly_raw), 2)
+			#poly_index = np.argmin(abs(DEFAULT_POLYPHONY_BINS-poly))
+			#events.append(Event(
+			#				name=POLYPHONY_KEY,
+			#				time=None,
+			#				value=poly_index,
+			#				text='{}/{}'.format(poly, DEFAULT_POLYPHONY_BINS[poly_index])
+			#))
 			
 		
 		return [f'{e.name}_{e.value}' for e in events]
@@ -466,8 +466,9 @@ class InputRepresentation():
 						omit_instruments=False,
 						omit_chords=False,
 						omit_meta=False,
-						omit_rhyt=False,
-						omit_poly=False):
+						#omit_rhyt=False,
+						#omit_poly=False
+						):
 		events = []
 		n_downbeat = 0
 		current_chord = None
@@ -524,24 +525,24 @@ class InputRepresentation():
 						duration = self.tick_to_position(item.end - item.start)
 						st_pos = np.argmin(abs(flags-item.start))
 						poly_raw[st_pos:st_pos+duration] += 1
-				if not omit_rhyt:
-					intensity = np.round(np.mean(rhythm_raw), 3)
-					rhythm_index = np.argmin(abs(DEFAULT_RHYTHM_INTENSITY-intensity))
-					events.append(Event(
-									name=RHYTHM_INTENSITY_KEY,
-									time=None,
-									value=rhythm_index,
-									text='{}/{}'.format(intensity, DEFAULT_RHYTHM_INTENSITY[rhythm_index])
-								))
-				if not omit_poly:
-					poly = np.round(np.mean(poly_raw), 2)
-					poly_index = np.argmin(abs(DEFAULT_POLYPHONY_BINS-poly))
-					events.append(Event(
-									name=POLYPHONY_KEY,
-									time=None,
-									value=poly_index,
-									text='{}/{}'.format(poly, DEFAULT_POLYPHONY_BINS[poly_index])
-					))
+				#if not omit_rhyt:
+				#	intensity = np.round(np.mean(rhythm_raw), 3)
+				#	rhythm_index = np.argmin(abs(DEFAULT_RHYTHM_INTENSITY-intensity))
+				#	events.append(Event(
+				#					name=RHYTHM_INTENSITY_KEY,
+				#					time=None,
+				#					value=rhythm_index,
+				#					text='{}/{}'.format(intensity, DEFAULT_RHYTHM_INTENSITY[rhythm_index])
+				#				))
+				#if not omit_poly:
+				#	poly = np.round(np.mean(poly_raw), 2)
+				#	poly_index = np.argmin(abs(DEFAULT_POLYPHONY_BINS-poly))
+				#	events.append(Event(
+				#					name=POLYPHONY_KEY,
+				#					time=None,
+				#					value=poly_index,
+				#					text='{}/{}'.format(poly, DEFAULT_POLYPHONY_BINS[poly_index])
+				#	))
 			
 				# velocity (Mean Velocity), bar level
 				# will be 0 if there's no notes

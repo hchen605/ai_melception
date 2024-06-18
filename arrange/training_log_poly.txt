@@ -1,5 +1,0 @@
-Using cache path: ./temp/v5
-Using cache path: ./temp/v5
-Using cache path: ./temp/v5
-Sanity Checking: 0it [00:00, ?it/s]Sanity Checking:   0%|          | 0/2 [00:00<?, ?it/s]Sanity Checking DataLoader 0:   0%|          | 0/2 [00:00<?, ?it/s]Sanity Checking DataLoader 0:  50%|█████     | 1/2 [00:00<00:00,  5.68it/s]Sanity Checking DataLoader 0: 100%|██████████| 2/2 [00:00<00:00,  7.01it/s]                                                                           Training: 0it [00:00, ?it/s]Training: 0it [00:00, ?it/s]Epoch 0: : 0it [00:00, ?it/s]train
-Epoch 0: : 1it [00:01,  1.50s/it]Epoch 0: : 1it [00:01,  1.50s/it, loss=7.4, v_num=9]

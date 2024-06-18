@@ -1,376 +1,0 @@
-Seq2SeqModule(
-  (transformer): EncoderDecoderModel(
-    (encoder): BertModel(
-      (embeddings): BertEmbeddings(
-        (word_embeddings): Embedding(1, 512, padding_idx=0)
-        (position_embeddings): Embedding(1024, 512)
-        (token_type_embeddings): Embedding(2, 512)
-        (LayerNorm): LayerNorm((512,), eps=1e-12, elementwise_affine=True)
-        (dropout): Dropout(p=0.1, inplace=False)
-      )
-      (encoder): BertEncoder(
-        (layer): ModuleList(
-          (0): BertLayer(
-            (attention): BertAttention(
-              (self): BertSelfAttention(
-                (query): Linear(in_features=512, out_features=512, bias=True)
-                (key): Linear(in_features=512, out_features=512, bias=True)
-                (value): Linear(in_features=512, out_features=512, bias=True)
-                (dropout): Dropout(p=0.1, inplace=False)
-                (distance_embedding): Embedding(2047, 64)
-              )
-              (output): BertSelfOutput(
-                (dense): Linear(in_features=512, out_features=512, bias=True)
-                (LayerNorm): LayerNorm((512,), eps=1e-12, elementwise_affine=True)
-                (dropout): Dropout(p=0.1, inplace=False)
-              )
-            )
-            (intermediate): BertIntermediate(
-              (dense): Linear(in_features=512, out_features=2048, bias=True)
-            )
-            (output): BertOutput(
-              (dense): Linear(in_features=2048, out_features=512, bias=True)
-              (LayerNorm): LayerNorm((512,), eps=1e-12, elementwise_affine=True)
-              (dropout): Dropout(p=0.1, inplace=False)
-            )
-          )
-          (1): BertLayer(
-            (attention): BertAttention(
-              (self): BertSelfAttention(
-                (query): Linear(in_features=512, out_features=512, bias=True)
-                (key): Linear(in_features=512, out_features=512, bias=True)
-                (value): Linear(in_features=512, out_features=512, bias=True)
-                (dropout): Dropout(p=0.1, inplace=False)
-                (distance_embedding): Embedding(2047, 64)
-              )
-              (output): BertSelfOutput(
-                (dense): Linear(in_features=512, out_features=512, bias=True)
-                (LayerNorm): LayerNorm((512,), eps=1e-12, elementwise_affine=True)
-                (dropout): Dropout(p=0.1, inplace=False)
-              )
-            )
-            (intermediate): BertIntermediate(
-              (dense): Linear(in_features=512, out_features=2048, bias=True)
-            )
-            (output): BertOutput(
-              (dense): Linear(in_features=2048, out_features=512, bias=True)
-              (LayerNorm): LayerNorm((512,), eps=1e-12, elementwise_affine=True)
-              (dropout): Dropout(p=0.1, inplace=False)
-            )
-          )
-          (2): BertLayer(
-            (attention): BertAttention(
-              (self): BertSelfAttention(
-                (query): Linear(in_features=512, out_features=512, bias=True)
-                (key): Linear(in_features=512, out_features=512, bias=True)
-                (value): Linear(in_features=512, out_features=512, bias=True)
-                (dropout): Dropout(p=0.1, inplace=False)
-                (distance_embedding): Embedding(2047, 64)
-              )
-              (output): BertSelfOutput(
-                (dense): Linear(in_features=512, out_features=512, bias=True)
-                (LayerNorm): LayerNorm((512,), eps=1e-12, elementwise_affine=True)
-                (dropout): Dropout(p=0.1, inplace=False)
-              )
-            )
-            (intermediate): BertIntermediate(
-              (dense): Linear(in_features=512, out_features=2048, bias=True)
-            )
-            (output): BertOutput(
-              (dense): Linear(in_features=2048, out_features=512, bias=True)
-              (LayerNorm): LayerNorm((512,), eps=1e-12, elementwise_affine=True)
-              (dropout): Dropout(p=0.1, inplace=False)
-            )
-          )
-          (3): BertLayer(
-            (attention): BertAttention(
-              (self): BertSelfAttention(
-                (query): Linear(in_features=512, out_features=512, bias=True)
-                (key): Linear(in_features=512, out_features=512, bias=True)
-                (value): Linear(in_features=512, out_features=512, bias=True)
-                (dropout): Dropout(p=0.1, inplace=False)
-                (distance_embedding): Embedding(2047, 64)
-              )
-              (output): BertSelfOutput(
-                (dense): Linear(in_features=512, out_features=512, bias=True)
-                (LayerNorm): LayerNorm((512,), eps=1e-12, elementwise_affine=True)
-                (dropout): Dropout(p=0.1, inplace=False)
-              )
-            )
-            (intermediate): BertIntermediate(
-              (dense): Linear(in_features=512, out_features=2048, bias=True)
-            )
-            (output): BertOutput(
-              (dense): Linear(in_features=2048, out_features=512, bias=True)
-              (LayerNorm): LayerNorm((512,), eps=1e-12, elementwise_affine=True)
-              (dropout): Dropout(p=0.1, inplace=False)
-            )
-          )
-        )
-      )
-      (pooler): BertPooler(
-        (dense): Linear(in_features=512, out_features=512, bias=True)
-        (activation): Tanh()
-      )
-    )
-    (decoder): BertLMHeadModel(
-      (bert): BertModel(
-        (embeddings): BertEmbeddings(
-          (word_embeddings): Embedding(1, 512, padding_idx=0)
-          (position_embeddings): Embedding(1024, 512)
-          (token_type_embeddings): Embedding(2, 512)
-          (LayerNorm): LayerNorm((512,), eps=1e-12, elementwise_affine=True)
-          (dropout): Dropout(p=0.1, inplace=False)
-        )
-        (encoder): BertEncoder(
-          (layer): ModuleList(
-            (0): BertLayer(
-              (attention): BertAttention(
-                (self): BertSelfAttention(
-                  (query): Linear(in_features=512, out_features=512, bias=True)
-                  (key): Linear(in_features=512, out_features=512, bias=True)
-                  (value): Linear(in_features=512, out_features=512, bias=True)
-                  (dropout): Dropout(p=0.1, inplace=False)
-                  (distance_embedding): Embedding(2047, 64)
-                )
-                (output): BertSelfOutput(
-                  (dense): Linear(in_features=512, out_features=512, bias=True)
-                  (LayerNorm): LayerNorm((512,), eps=1e-12, elementwise_affine=True)
-                  (dropout): Dropout(p=0.1, inplace=False)
-                )
-              )
-              (crossattention): BertAttention(
-                (self): BertSelfAttention(
-                  (query): Linear(in_features=512, out_features=512, bias=True)
-                  (key): Linear(in_features=512, out_features=512, bias=True)
-                  (value): Linear(in_features=512, out_features=512, bias=True)
-                  (dropout): Dropout(p=0.1, inplace=False)
-                  (distance_embedding): Embedding(2047, 64)
-                )
-                (output): BertSelfOutput(
-                  (dense): Linear(in_features=512, out_features=512, bias=True)
-                  (LayerNorm): LayerNorm((512,), eps=1e-12, elementwise_affine=True)
-                  (dropout): Dropout(p=0.1, inplace=False)
-                )
-              )
-              (intermediate): BertIntermediate(
-                (dense): Linear(in_features=512, out_features=2048, bias=True)
-              )
-              (output): BertOutput(
-                (dense): Linear(in_features=2048, out_features=512, bias=True)
-                (LayerNorm): LayerNorm((512,), eps=1e-12, elementwise_affine=True)
-                (dropout): Dropout(p=0.1, inplace=False)
-              )
-            )
-            (1): BertLayer(
-              (attention): BertAttention(
-                (self): BertSelfAttention(
-                  (query): Linear(in_features=512, out_features=512, bias=True)
-                  (key): Linear(in_features=512, out_features=512, bias=True)
-                  (value): Linear(in_features=512, out_features=512, bias=True)
-                  (dropout): Dropout(p=0.1, inplace=False)
-                  (distance_embedding): Embedding(2047, 64)
-                )
-                (output): BertSelfOutput(
-                  (dense): Linear(in_features=512, out_features=512, bias=True)
-                  (LayerNorm): LayerNorm((512,), eps=1e-12, elementwise_affine=True)
-                  (dropout): Dropout(p=0.1, inplace=False)
-                )
-              )
-              (crossattention): BertAttention(
-                (self): BertSelfAttention(
-                  (query): Linear(in_features=512, out_features=512, bias=True)
-                  (key): Linear(in_features=512, out_features=512, bias=True)
-                  (value): Linear(in_features=512, out_features=512, bias=True)
-                  (dropout): Dropout(p=0.1, inplace=False)
-                  (distance_embedding): Embedding(2047, 64)
-                )
-                (output): BertSelfOutput(
-                  (dense): Linear(in_features=512, out_features=512, bias=True)
-                  (LayerNorm): LayerNorm((512,), eps=1e-12, elementwise_affine=True)
-                  (dropout): Dropout(p=0.1, inplace=False)
-                )
-              )
-              (intermediate): BertIntermediate(
-                (dense): Linear(in_features=512, out_features=2048, bias=True)
-              )
-              (output): BertOutput(
-                (dense): Linear(in_features=2048, out_features=512, bias=True)
-                (LayerNorm): LayerNorm((512,), eps=1e-12, elementwise_affine=True)
-                (dropout): Dropout(p=0.1, inplace=False)
-              )
-            )
-            (2): BertLayer(
-              (attention): BertAttention(
-                (self): BertSelfAttention(
-                  (query): Linear(in_features=512, out_features=512, bias=True)
-                  (key): Linear(in_features=512, out_features=512, bias=True)
-                  (value): Linear(in_features=512, out_features=512, bias=True)
-                  (dropout): Dropout(p=0.1, inplace=False)
-                  (distance_embedding): Embedding(2047, 64)
-                )
-                (output): BertSelfOutput(
-                  (dense): Linear(in_features=512, out_features=512, bias=True)
-                  (LayerNorm): LayerNorm((512,), eps=1e-12, elementwise_affine=True)
-                  (dropout): Dropout(p=0.1, inplace=False)
-                )
-              )
-              (crossattention): BertAttention(
-                (self): BertSelfAttention(
-                  (query): Linear(in_features=512, out_features=512, bias=True)
-                  (key): Linear(in_features=512, out_features=512, bias=True)
-                  (value): Linear(in_features=512, out_features=512, bias=True)
-                  (dropout): Dropout(p=0.1, inplace=False)
-                  (distance_embedding): Embedding(2047, 64)
-                )
-                (output): BertSelfOutput(
-                  (dense): Linear(in_features=512, out_features=512, bias=True)
-                  (LayerNorm): LayerNorm((512,), eps=1e-12, elementwise_affine=True)
-                  (dropout): Dropout(p=0.1, inplace=False)
-                )
-              )
-              (intermediate): BertIntermediate(
-                (dense): Linear(in_features=512, out_features=2048, bias=True)
-              )
-              (output): BertOutput(
-                (dense): Linear(in_features=2048, out_features=512, bias=True)
-                (LayerNorm): LayerNorm((512,), eps=1e-12, elementwise_affine=True)
-                (dropout): Dropout(p=0.1, inplace=False)
-              )
-            )
-            (3): BertLayer(
-              (attention): BertAttention(
-                (self): BertSelfAttention(
-                  (query): Linear(in_features=512, out_features=512, bias=True)
-                  (key): Linear(in_features=512, out_features=512, bias=True)
-                  (value): Linear(in_features=512, out_features=512, bias=True)
-                  (dropout): Dropout(p=0.1, inplace=False)
-                  (distance_embedding): Embedding(2047, 64)
-                )
-                (output): BertSelfOutput(
-                  (dense): Linear(in_features=512, out_features=512, bias=True)
-                  (LayerNorm): LayerNorm((512,), eps=1e-12, elementwise_affine=True)
-                  (dropout): Dropout(p=0.1, inplace=False)
-                )
-              )
-              (crossattention): BertAttention(
-                (self): BertSelfAttention(
-                  (query): Linear(in_features=512, out_features=512, bias=True)
-                  (key): Linear(in_features=512, out_features=512, bias=True)
-                  (value): Linear(in_features=512, out_features=512, bias=True)
-                  (dropout): Dropout(p=0.1, inplace=False)
-                  (distance_embedding): Embedding(2047, 64)
-                )
-                (output): BertSelfOutput(
-                  (dense): Linear(in_features=512, out_features=512, bias=True)
-                  (LayerNorm): LayerNorm((512,), eps=1e-12, elementwise_affine=True)
-                  (dropout): Dropout(p=0.1, inplace=False)
-                )
-              )
-              (intermediate): BertIntermediate(
-                (dense): Linear(in_features=512, out_features=2048, bias=True)
-              )
-              (output): BertOutput(
-                (dense): Linear(in_features=2048, out_features=512, bias=True)
-                (LayerNorm): LayerNorm((512,), eps=1e-12, elementwise_affine=True)
-                (dropout): Dropout(p=0.1, inplace=False)
-              )
-            )
-            (4): BertLayer(
-              (attention): BertAttention(
-                (self): BertSelfAttention(
-                  (query): Linear(in_features=512, out_features=512, bias=True)
-                  (key): Linear(in_features=512, out_features=512, bias=True)
-                  (value): Linear(in_features=512, out_features=512, bias=True)
-                  (dropout): Dropout(p=0.1, inplace=False)
-                  (distance_embedding): Embedding(2047, 64)
-                )
-                (output): BertSelfOutput(
-                  (dense): Linear(in_features=512, out_features=512, bias=True)
-                  (LayerNorm): LayerNorm((512,), eps=1e-12, elementwise_affine=True)
-                  (dropout): Dropout(p=0.1, inplace=False)
-                )
-              )
-              (crossattention): BertAttention(
-                (self): BertSelfAttention(
-                  (query): Linear(in_features=512, out_features=512, bias=True)
-                  (key): Linear(in_features=512, out_features=512, bias=True)
-                  (value): Linear(in_features=512, out_features=512, bias=True)
-                  (dropout): Dropout(p=0.1, inplace=False)
-                  (distance_embedding): Embedding(2047, 64)
-                )
-                (output): BertSelfOutput(
-                  (dense): Linear(in_features=512, out_features=512, bias=True)
-                  (LayerNorm): LayerNorm((512,), eps=1e-12, elementwise_affine=True)
-                  (dropout): Dropout(p=0.1, inplace=False)
-                )
-              )
-              (intermediate): BertIntermediate(
-                (dense): Linear(in_features=512, out_features=2048, bias=True)
-              )
-              (output): BertOutput(
-                (dense): Linear(in_features=2048, out_features=512, bias=True)
-                (LayerNorm): LayerNorm((512,), eps=1e-12, elementwise_affine=True)
-                (dropout): Dropout(p=0.1, inplace=False)
-              )
-            )
-            (5): BertLayer(
-              (attention): BertAttention(
-                (self): BertSelfAttention(
-                  (query): Linear(in_features=512, out_features=512, bias=True)
-                  (key): Linear(in_features=512, out_features=512, bias=True)
-                  (value): Linear(in_features=512, out_features=512, bias=True)
-                  (dropout): Dropout(p=0.1, inplace=False)
-                  (distance_embedding): Embedding(2047, 64)
-                )
-                (output): BertSelfOutput(
-                  (dense): Linear(in_features=512, out_features=512, bias=True)
-                  (LayerNorm): LayerNorm((512,), eps=1e-12, elementwise_affine=True)
-                  (dropout): Dropout(p=0.1, inplace=False)
-                )
-              )
-              (crossattention): BertAttention(
-                (self): BertSelfAttention(
-                  (query): Linear(in_features=512, out_features=512, bias=True)
-                  (key): Linear(in_features=512, out_features=512, bias=True)
-                  (value): Linear(in_features=512, out_features=512, bias=True)
-                  (dropout): Dropout(p=0.1, inplace=False)
-                  (distance_embedding): Embedding(2047, 64)
-                )
-                (output): BertSelfOutput(
-                  (dense): Linear(in_features=512, out_features=512, bias=True)
-                  (LayerNorm): LayerNorm((512,), eps=1e-12, elementwise_affine=True)
-                  (dropout): Dropout(p=0.1, inplace=False)
-                )
-              )
-              (intermediate): BertIntermediate(
-                (dense): Linear(in_features=512, out_features=2048, bias=True)
-              )
-              (output): BertOutput(
-                (dense): Linear(in_features=2048, out_features=512, bias=True)
-                (LayerNorm): LayerNorm((512,), eps=1e-12, elementwise_affine=True)
-                (dropout): Dropout(p=0.1, inplace=False)
-              )
-            )
-          )
-        )
-      )
-      (cls): BertOnlyMLMHead(
-        (predictions): BertLMPredictionHead(
-          (transform): BertPredictionHeadTransform(
-            (dense): Linear(in_features=512, out_features=512, bias=True)
-            (LayerNorm): LayerNorm((512,), eps=1e-12, elementwise_affine=True)
-          )
-          (decoder): Linear(in_features=512, out_features=1, bias=True)
-        )
-      )
-    )
-  )
-  (bar_embedding): Embedding(264, 512)
-  (pos_embedding): Embedding(513, 512)
-  (desc_in): Embedding(965, 512)
-  (in_layer): Embedding(1357, 512)
-  (out_layer): Linear(in_features=512, out_features=1357, bias=False)
-  (loss_fn): CrossEntropyLoss()
-)
-Sanity Checking: 0it [00:00, ?it/s]Sanity Checking:   0%|          | 0/2 [00:00<?, ?it/s]Sanity Checking DataLoader 0:   0%|          | 0/2 [00:00<?, ?it/s]Sanity Checking DataLoader 0:  50%|█████     | 1/2 [00:00<00:00,  8.74it/s]Sanity Checking DataLoader 0: 100%|██████████| 2/2 [00:00<00:00,  2.16it/s]                                                                           Training: 0it [00:00, ?it/s]Training: 0it [00:00, ?it/s]Epoch 0: : 0it [00:00, ?it/s]Epoch 0: : 1it [00:01,  1.84s/it]Epoch 0: : 1it [00:01,  1.84s/it, loss=7.44, v_num=10]Epoch 0: : 2it [00:02,  1.27s/it, loss=7.44, v_num=10]Epoch 0: : 2it [00:02,  1.27s/it, loss=7.43, v_num=10]Epoch 0: : 3it [00:03,  1.07s/it, loss=7.43, v_num=10]Epoch 0: : 3it [00:03,  1.07s/it, loss=7.41, v_num=10]Epoch 0: : 4it [00:03,  1.01it/s, loss=7.41, v_num=10]Epoch 0: : 4it [00:03,  1.01it/s, loss=7.4, v_num=10] Epoch 0: : 5it [00:04,  1.08it/s, loss=7.4, v_num=10]Epoch 0: : 5it [00:04,  1.08it/s, loss=7.33, v_num=10]Epoch 0: : 6it [00:05,  1.14it/s, loss=7.33, v_num=10]Epoch 0: : 6it [00:05,  1.14it/s, loss=7.3, v_num=10] Epoch 0: : 7it [00:05,  1.18it/s, loss=7.3, v_num=10]Epoch 0: : 7it [00:05,  1.18it/s, loss=7.26, v_num=10]Epoch 0: : 8it [00:06,  1.20it/s, loss=7.26, v_num=10]Epoch 0: : 8it [00:06,  1.20it/s, loss=7.23, v_num=10]Epoch 0: : 9it [00:07,  1.22it/s, loss=7.23, v_num=10]Epoch 0: : 9it [00:07,  1.22it/s, loss=7.17, v_num=10]Epoch 0: : 10it [00:07,  1.25it/s, loss=7.17, v_num=10]Epoch 0: : 10it [00:07,  1.25it/s, loss=7.13, v_num=10]Epoch 0: : 11it [00:08,  1.27it/s, loss=7.13, v_num=10]Epoch 0: : 11it [00:08,  1.27it/s, loss=7.07, v_num=10]Epoch 0: : 12it [00:09,  1.27it/s, loss=7.07, v_num=10]Epoch 0: : 12it [00:09,  1.27it/s, loss=7.03, v_num=10]Epoch 0: : 13it [00:10,  1.29it/s, loss=7.03, v_num=10]Epoch 0: : 13it [00:10,  1.29it/s, loss=6.97, v_num=10]Epoch 0: : 14it [00:10,  1.30it/s, loss=6.97, v_num=10]Epoch 0: : 14it [00:10,  1.30it/s, loss=6.95, v_num=10]Epoch 0: : 15it [00:11,  1.31it/s, loss=6.95, v_num=10]Epoch 0: : 15it [00:11,  1.31it/s, loss=6.9, v_num=10] Epoch 0: : 16it [00:12,  1.32it/s, loss=6.9, v_num=10]Epoch 0: : 16it [00:12,  1.32it/s, loss=6.85, v_num=10]

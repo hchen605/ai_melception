@@ -30,7 +30,7 @@ def main(args):
     jobs = {
         "13oIf-706vszak0DdiQpTB09btJx7zTIy": "./init/data.zip",  # init pt-weight
         "10E6F8RbRuSSg9wmYiPv6jyDsaFSSuyte": "./arrange/checkpoint.zip",  # arrange pt-weight
-        "http://hog.ee.columbia.edu/craffel/lmd/lmd_full.tar.gz": os.path.join(args.data_path, "lmd_full.tar.gz")  # Training Data
+        #"http://hog.ee.columbia.edu/craffel/lmd/lmd_full.tar.gz": os.path.join(args.data_path, "lmd_full.tar.gz")  # Training Data
     }
     
     # Download files from Google Drive

@@ -290,9 +290,9 @@ def re_harmonization(lead_sheet, chord_table, query_phrases, indices, shifts, ac
         chord_table[-pad_len:, -1] = -1
     acc_roll = acc_roll.reshape(-1, 32, 128)
     chord_table = chord_table.reshape(-1, 8, 36)
-    acc_roll = torch.from_numpy(acc_roll).float().cuda()
+    acc_roll = torch.from_numpy(acc_roll).float()#.cuda()
     acc_roll = torch.clip(acc_roll, min=0, max=31)
-    gt_chord = torch.from_numpy(chord_table).float().cuda()
+    gt_chord = torch.from_numpy(chord_table).float()#.cuda()
     est_x = model.inference(acc_roll, gt_chord, sample=False)
     acc_roll = cvt.grid2pr(est_x.reshape(-1, 15, 6))
     #interpolate MIDI velocity

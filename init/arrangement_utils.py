@@ -118,8 +118,9 @@ def load_premise_preload(DATA_FILE_ROOT, DEVICE):
             loaded_lists = pickle.load(f)
         return loaded_lists
 
+    script_dir = os.path.dirname(os.path.abspath(__file__))
     #file_path = os.path.join(DATA_FILE_ROOT, 'REF.pkl')
-    file_path = 'REF.pkl'
+    file_path = os.path.join(script_dir, 'REF.pkl')
     #save_lists(file_path, REF, REF_PROG, REF_MIX)
     REF, REF_PROG, REF_MIX = load_lists(file_path)
     """Initialize orchestration model (Prior + Q&A)"""
@@ -134,8 +135,8 @@ def load_premise_preload(DATA_FILE_ROOT, DEVICE):
     print('Finished.')
     return piano_arranger, orchestrator, (acc_pool, edge_weights, texture_filter), (REF, REF_PROG, REF_MIX)
 
-def read_lead_sheet(DEMO_ROOT, SONG_NAME, SEGMENTATION, NOTE_SHIFT, MIDI_FILE, melody_track_ID=0):
-    melody_roll, chord_roll = cvt.leadsheet2matrix(os.path.join(DEMO_ROOT, SONG_NAME, MIDI_FILE), melody_track_ID)
+def read_lead_sheet(MIDI_PATH, SEGMENTATION, NOTE_SHIFT, melody_track_ID=0):
+    melody_roll, chord_roll = cvt.leadsheet2matrix(MIDI_PATH, melody_track_ID)
     assert(len(melody_roll == len(chord_roll)))
     if NOTE_SHIFT != 0:
         melody_roll = melody_roll[int(NOTE_SHIFT*4):, :]

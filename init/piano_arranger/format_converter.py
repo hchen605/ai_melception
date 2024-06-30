@@ -2,6 +2,7 @@ import pretty_midi as pyd
 import numpy as np
 import sys
 sys.path.append('piano_arranger/chord_recognition')
+sys.path.append('../../ai_melception/init/piano_arranger/chord_recognition')
 from main import transcribe_cb1000_midi
 from scipy.interpolate import interp1d
 import mir_eval

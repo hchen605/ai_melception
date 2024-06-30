@@ -61,7 +61,7 @@ tensorboard-data-server==0.7.2
 tf-keras==2.15.0
 threadpoolctl==3.3.0
 tokenizers==0.10.3
-torch==1.11.0+cu115
+torch==1.11.0
 torchtext==0.12.0
 tqdm==4.66.2
 traitlets==5.14.1

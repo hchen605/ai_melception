@@ -77,11 +77,14 @@ if USE_PROMPT:  #condition with both instrument set and track function of the fi
 else: #condition with instrument set only
     instruments, track_function = func_prompt
     midi_band = orchestration(acc_piano, None, instruments, None, orchestrator, DEVICE, blur=.25, p=.05, t=8, tempo=TEMPO)
-mel_track = pyd.Instrument(program=0, is_drum=False, name='melody')
-mel_track.notes = midi_piano.instruments[0].notes
-midi_band.instruments.append(mel_track)
 
-#midi_band.instruments.append(midi_in.instruments[0])
+#mel_track = pyd.Instrument(program=0, is_drum=False, name='melody')
+#mel_track.notes = midi_piano.instruments[0].notes
+#midi_band.instruments.append(mel_track)
+
+# Merge the tracks from both MIDI files
+for instrument in midi_piano.instruments:
+    midi_band.instruments.append(instrument)
 
 midi_path = f'./demo/arrangement_band.mid'
 midi_band.write(args.output_band)
